@@ -1,4 +1,5 @@
 package week2;
+import java.util.*;
 
 public class Week2Activity1 {
     public static void main(String[] args) {
@@ -49,5 +50,10 @@ public class Week2Activity1 {
         // TODO: Your code here
         System.out.println("The total number of booked seats are: " + seatBookCount);
 
+        Scanner input = new Scanner(System.in);
+        System.out.println("Book seat? ");
+        String answer = input.nextLine();
+
+        
     }
 }
