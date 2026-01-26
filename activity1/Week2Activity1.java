@@ -1,4 +1,5 @@
-package week2;
+package activity1;
+
 import java.util.*;
 
 public class Week2Activity1 {
