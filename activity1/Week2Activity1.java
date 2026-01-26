@@ -55,6 +55,50 @@ public class Week2Activity1 {
         System.out.println("Book seat? ");
         String answer = input.nextLine();
 
-        
+        boolean booked = false;
+        if (answer.equals("Y") || answer.equals("y")) {
+
+            int availableCount = 0;
+            for (int i = 0; i < theater.length; i++) {
+                for (int j = 0; j < theater[i].length; j++) {
+                    if (theater[i][j] == 0) {
+                        availableCount++;
+                    }
+                }
+            }
+
+            if (availableCount > 0) {
+                int randomPick = (int) (Math.random() * availableCount);
+                int counter = 0;
+
+                for (int i = 0; i < theater.length; i++) {
+                    for (int j = 0; j < theater[i].length; j++) {
+                        if (theater[i][j] == 0) {
+                            if (counter == randomPick) {
+                                theater[i][j] = 1;
+                                booked = true;
+                                break; // stop inner loop
+                            }
+                            counter++;
+                        }
+                    }
+                    if (booked)
+                        break; // stop outer loop
+                }
+            }
+            System.out.println("Seat booked successfully!");
+        }
+
+        // print updated seating chart
+        for (int i = 0; i < theater.length; i++) {
+            for (int j = 0; j < theater[i].length; j++) {
+                if (theater[i][j] == 1)
+                    System.out.print("|x| ");
+                else
+                    System.out.print("|-| ");
+            }
+            System.out.println();
+        }
     }
+
 }
