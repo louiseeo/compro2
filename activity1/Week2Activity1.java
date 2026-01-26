@@ -52,7 +52,7 @@ public class Week2Activity1 {
         System.out.println("The total number of booked seats are: " + seatBookCount);
 
         Scanner input = new Scanner(System.in);
-        System.out.println("Book seat? ");
+        System.out.print("Book seat? ");
         String answer = input.nextLine();
 
         boolean booked = false;
