@@ -8,16 +8,21 @@ public class Main {
         StringBuilder sb = new StringBuilder();
 
         try (Scanner sc = new Scanner(System.in)) {
-            System.out.print("First Name: ");
-            sb.append(sc.nextLine()).append("\n");
-            System.out.print("Last Name: ");
-            sb.append(sc.nextLine()).append("\n");
-            System.out.print("Email: ");
-            sb.append(sc.nextLine()).append("\n");
-            System.out.print("Age: ");
-            sb.append(sc.nextLine()).append("\n");
-            System.out.print("Phone: ");
-            sb.append(sc.nextLine()).append("\n");
+            sb.append("First Name: ");
+            System.out.print("Enter First Name: ");
+
+            sb.append(sc.nextLine()).append("\nLast Name: ");
+            System.out.print("Enter Last Name: ");
+
+            sb.append(sc.nextLine()).append("\nEmail:");
+            System.out.print("Enter Email: ");
+
+            sb.append(sc.nextLine()).append("\nAge: ");
+            System.out.print("Enter Age: ");
+
+            sb.append(sc.nextLine()).append("\nPhone: ");
+            System.out.print("Enter Phone: ");
+            sb.append(sc.nextLine());
         } catch (InputMismatchException e) {
             System.out.println("Invalid input");
         }
