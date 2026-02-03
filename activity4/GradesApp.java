@@ -22,9 +22,11 @@ public class GradesApp {
                     [1] Add Grade for subject
                     [2] Exit
                         """);
+
             System.out.print("Choice: ");
             int choice = sc.nextInt();
             
+            if (choice == 1){
             System.out.print("Enter subject: ");
             subjectName[r] = sc.next();
 
@@ -51,7 +53,16 @@ public class GradesApp {
 
             sc.nextLine();
             System.out.println();
-        }
+        } else if (choice == 2){
+            System.out.println("Good bye... Muwah!");
+            break;
+        } else
+            System.out.println("Invalid choice");
+            r--;
+
+
+    }
+        writeData();
     }
 
     public static void writeData() {
