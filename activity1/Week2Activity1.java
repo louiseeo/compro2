@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Week2Activity1 {
+public class TheaterBooking {
     public static void main(String[] args) {
         // 1. Declare and initialize the 1D array for a single row
         int[] theaterRow = new int[8];
