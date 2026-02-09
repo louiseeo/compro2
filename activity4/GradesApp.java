@@ -33,27 +33,27 @@ public class GradesApp {
                 subjectName[r] = sc.next();
 
                 // Prompt user to enter its grades per subject
-                System.out.print("Enter Prelim grade: ");
+                System.out.print("Prelim: ");
                 try {
                     gradeData[r][0] = sc.nextDouble();
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid number");
+                    System.out.println("Invalid input. Numbers from 1 to 100 only.");
                     sc.nextLine(); // clear bad input
                 }
 
-                System.out.print("Enter Midterm grade: ");
+                System.out.print("Midterm: ");
                 try {
                     gradeData[r][1] = sc.nextDouble();
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid number");
+                    System.out.println("Invalid input. Numbers from 1 to 100 only.");
                     sc.nextLine(); // clear bad input
                 }
 
-                System.out.print("Enter Finals grade: ");
+                System.out.print("Finals: ");
                 try {
                     gradeData[r][2] = sc.nextDouble();
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid number");
+                    System.out.println("Invalid input. Numbers from 1 to 100 only.");
                     sc.nextLine(); // clear bad input
                 }
 
@@ -68,7 +68,6 @@ public class GradesApp {
         }
 
         sc.close(); // close scanner
-    				
         writeData(); // call method
     }
 
