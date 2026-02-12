@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+
 // need to fix reading and writing and comments also edit mo pa yung csv
 public class GradeSystemUpgrade {
     static ArrayList<Subject> subjects = new ArrayList<>();
@@ -23,9 +24,6 @@ public class GradeSystemUpgrade {
                 case 4:
                     editSubjectGrades();
                     break;
-                case 5:
-                    deleteSubject();
-                    break;
                 case 0: {
                     System.out.println("Exiting program... Goodbye!");
                     sc.close();
@@ -42,62 +40,61 @@ public class GradeSystemUpgrade {
         System.out.println("2. Display All Grades");
         System.out.println("3. Search Subject");
         System.out.println("4. Edit Subject Grades");
-        System.out.println("5. Delete Subject");
         System.out.println("0. Exit");
         System.out.print("Enter choice: ");
     }
 
-    private static int getValidChoice(int min, int max) {
+    public static int getValidChoice(int min, int max) {
         int choice;
         while (true) {
             try {
                 choice = sc.nextInt();
-                sc.nextLine(); 
+                sc.nextLine();
                 if (choice >= min && choice <= max)
                     return choice;
                 else
                     System.out.print("Invalid choice. Enter a number between " + min + " and " + max + ": ");
             } catch (Exception e) {
                 System.out.print("Invalid input. Enter a number: ");
-                sc.nextLine(); 
+                sc.nextLine();
             }
         }
     }
 
-    // --- Add Subject ---
-    private static void addSubject() {
+    // Add subject
+    public static void addSubject() {
         Subject s = new Subject();
         System.out.print("Enter subject name: ");
         s.name = sc.nextLine();
 
         s.prelim = getValidGrade("Prelim");
         s.midterm = getValidGrade("Midterm");
-        s.finalGrade = getValidGrade("Final");
+        s.finals = getValidGrade("Final");
 
         subjects.add(s);
         System.out.println("Subject added successfully!");
     }
 
-    private static double getValidGrade(String term) {
+    public static double getValidGrade(String term) {
         double grade;
         while (true) {
             System.out.print(term + ": ");
             try {
                 grade = sc.nextDouble();
-                sc.nextLine(); 
+                sc.nextLine();
                 if (grade >= 0 && grade <= 100)
                     return grade;
                 else
                     System.out.println("Grade must be 0-100.");
             } catch (Exception e) {
                 System.out.println("Invalid input! Enter a number.");
-                sc.nextLine(); 
+                sc.nextLine();
             }
         }
     }
 
     // --- Display All Grades ---
-    private static void displayAllGrades() {
+    public static void displayAllGrades() {
         if (subjects.isEmpty()) {
             System.out.println("No subjects available.");
             return;
@@ -105,7 +102,7 @@ public class GradeSystemUpgrade {
         System.out.printf("\n%-15s %-10s %-10s %-10s\n", "Subject", "Prelim", "Midterm", "Final");
         System.out.println("---------------------------------------------");
         for (Subject s : subjects) {
-            System.out.printf("%-15s %-10.2f %-10.2f %-10.2f\n", s.name, s.prelim, s.midterm, s.finalGrade);
+            System.out.printf("%-15s %-10.2f %-10.2f %-10.2f\n", s.name, s.prelim, s.midterm, s.finals);
         }
     }
 
@@ -124,7 +121,7 @@ public class GradeSystemUpgrade {
 
         for (Subject s : subjects) {
             if (s.name.toLowerCase().contains(keyword)) {
-                System.out.printf("%-15s %-10.2f %-10.2f %-10.2f\n", s.name, s.prelim, s.midterm, s.finalGrade);
+                System.out.printf("%-15s %-10.2f %-10.2f %-10.2f\n", s.name, s.prelim, s.midterm, s.finals);
                 found = true;
             }
         }
@@ -146,7 +143,7 @@ public class GradeSystemUpgrade {
                 System.out.println("Editing grades for " + s.name);
                 s.prelim = getValidGrade("Prelim");
                 s.midterm = getValidGrade("Midterm");
-                s.finalGrade = getValidGrade("Final");
+                s.finals = getValidGrade("Final");
                 System.out.println("Grades updated successfully!");
                 return;
             }
@@ -154,47 +151,29 @@ public class GradeSystemUpgrade {
         System.out.println("Subject not found.");
     }
 
-    // --- Delete Subject ---
-    private static void deleteSubject() {
-        if (subjects.isEmpty()) {
-            System.out.println("No subjects available.");
-            return;
-        }
-        System.out.print("Enter subject name to delete: ");
-        String keyword = sc.nextLine().toLowerCase();
-
-        for (int i = 0; i < subjects.size(); i++) {
-            if (subjects.get(i).name.toLowerCase().equals(keyword)) {
-                subjects.remove(i);
-                System.out.println("Subject deleted successfully!");
-                return;
-            }
-        }
-        System.out.println("Subject not found.");
-    }
-    
-    private static void saveData() {
+    public static void saveData() {
         StringBuilder data = new StringBuilder("Subject,Prelim,Midterm,Final");
-        for(Subject s: subjects){
+        for (Subject s : subjects) {
             data.append("\n")
-            .append(s.name).append(",")
-            .append(s.prelim).append(",")
-            .append(s.midterm).append(",")
-            .append(s.finals).append(",");
+                    .append(s.name).append(",")
+                    .append(s.prelim).append(",")
+                    .append(s.midterm).append(",")
+                    .append(s.finals).append(",");
         }
-        
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("grades.csv"))) {
             bw.write(data.toString());
             bw.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-}
-    
-    private static void loadData() {
+    }
+
+    public static void loadData() {
         subjects.clear();
         try (Scanner fileScanner = new Scanner(new java.io.File("grades.csv"))) {
-            if (fileScanner.hasNextLine()) fileScanner.nextLine(); // skip header
+            if (fileScanner.hasNextLine())
+                fileScanner.nextLine(); // skip the header
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine();
                 String[] parts = line.split(",");
@@ -203,7 +182,7 @@ public class GradeSystemUpgrade {
                     s.name = parts[0];
                     s.prelim = Double.parseDouble(parts[1]);
                     s.midterm = Double.parseDouble(parts[2]);
-                    s.finalGrade = Double.parseDouble(parts[3]);
+                    s.finals = Double.parseDouble(parts[3]);
                     subjects.add(s);
                 }
             }
@@ -213,10 +192,10 @@ public class GradeSystemUpgrade {
     }
 }
 
-// --- Subject Class ---
+// Subject class
 class Subject {
     String name;
     double prelim;
     double midterm;
-    double finalGrade;
+    double finals;
 }
