@@ -1,64 +1,58 @@
 import java.util.*;
 import java.io.*;
 
-// need to fix reading and writing and comments also edit mo pa yung csv
 public class GradeSystemUpgrade {
     static ArrayList<Subject> subjects = new ArrayList<>();
     static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
+        loadData(); // read the existing CSV at start
+
         while (true) {
             displayMenu();
-            int choice = getValidChoice(0, 5);
+
+            int choice;
+            try {
+                System.out.print("Enter choice: ");
+                choice = sc.nextInt();
+                sc.nextLine(); // clear buffer
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid choice. Choose a number from 0–3.");
+                sc.nextLine(); // clear invalid input
+                continue; // go back to menu
+            }
 
             switch (choice) {
                 case 1:
-                    addSubject();
+                    addSubject(); // calls addSubject method
                     break;
                 case 2:
-                    displayAllGrades();
+                    displayAllGrades(); // calls the method to display grades
                     break;
                 case 3:
-                    searchSubject();
+                    searchSubject(); // searches existing subject saved
                     break;
-                case 4:
-                    editSubjectGrades();
-                    break;
-                case 0: {
-                    System.out.println("Exiting program... Goodbye!");
+                case 0:
+                    System.out.println("Exiting program... Goodbye!\n");
+                    writeData(); // save before exiting
                     sc.close();
-                    System.exit(0);
+                    System.exit(0); // stops program
                     break;
-                }
+                default:
+                    System.out.println("Invalid choice. Choose a number from 0–3.");
             }
         }
     }
 
     public static void displayMenu() {
-        System.out.println("\n--- GRADE MENU ---");
-        System.out.println("1. Add Subject / Enter Grades");
-        System.out.println("2. Display All Grades");
-        System.out.println("3. Search Subject");
-        System.out.println("4. Edit Subject Grades");
-        System.out.println("0. Exit");
-        System.out.print("Enter choice: ");
-    }
-
-    public static int getValidChoice(int min, int max) {
-        int choice;
-        while (true) {
-            try {
-                choice = sc.nextInt();
-                sc.nextLine();
-                if (choice >= min && choice <= max)
-                    return choice;
-                else
-                    System.out.print("Invalid choice. Enter a number between " + min + " and " + max + ": ");
-            } catch (Exception e) {
-                System.out.print("Invalid input. Enter a number: ");
-                sc.nextLine();
-            }
-        }
+        System.out.println("""
+            \nWelcome to Grade Program!
+                Menu
+                [1] Add Grade for Subject
+                [2] Display grades
+                [3] Search
+                [0] Exit
+            """);
     }
 
     // Add subject
@@ -75,6 +69,7 @@ public class GradeSystemUpgrade {
         System.out.println("Subject added successfully!");
     }
 
+    // Method that checks if entered grade is valid
     public static double getValidGrade(String term) {
         double grade;
         while (true) {
@@ -85,7 +80,7 @@ public class GradeSystemUpgrade {
                 if (grade >= 0 && grade <= 100)
                     return grade;
                 else
-                    System.out.println("Grade must be 0-100.");
+                    System.out.println("Grade must be 0–100.");
             } catch (Exception e) {
                 System.out.println("Invalid input! Enter a number.");
                 sc.nextLine();
@@ -93,9 +88,9 @@ public class GradeSystemUpgrade {
         }
     }
 
-    // --- Display All Grades ---
+    // Display grades method
     public static void displayAllGrades() {
-        if (subjects.isEmpty()) {
+        if (subjects.isEmpty()) { // checks if there are subjects saved
             System.out.println("No subjects available.");
             return;
         }
@@ -106,8 +101,8 @@ public class GradeSystemUpgrade {
         }
     }
 
-    // --- Search Subject ---
-    private static void searchSubject() {
+    // Search method
+    public static void searchSubject() {
         if (subjects.isEmpty()) {
             System.out.println("No subjects available.");
             return;
@@ -129,44 +124,26 @@ public class GradeSystemUpgrade {
             System.out.println("No subjects found with that keyword.");
     }
 
-    // --- Edit Subject Grades ---
-    private static void editSubjectGrades() {
-        if (subjects.isEmpty()) {
-            System.out.println("No subjects available.");
-            return;
-        }
-        System.out.print("Enter subject name to edit: ");
-        String keyword = sc.nextLine().toLowerCase();
-
+    public static void writeData() {
+        StringBuilder sb = new StringBuilder("Subject,Prelim,Midterm,Final");
         for (Subject s : subjects) {
-            if (s.name.toLowerCase().equals(keyword)) {
-                System.out.println("Editing grades for " + s.name);
-                s.prelim = getValidGrade("Prelim");
-                s.midterm = getValidGrade("Midterm");
-                s.finals = getValidGrade("Final");
-                System.out.println("Grades updated successfully!");
-                return;
-            }
-        }
-        System.out.println("Subject not found.");
-    }
-
-    public static void saveData() {
-        StringBuilder data = new StringBuilder("Subject,Prelim,Midterm,Final");
-        for (Subject s : subjects) {
-            data.append("\n")
+            sb.append("\n")
                     .append(s.name).append(",")
                     .append(s.prelim).append(",")
                     .append(s.midterm).append(",")
-                    .append(s.finals).append(",");
+                    .append(s.finals);
         }
 
+        // writing the file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("grades.csv"))) {
-            bw.write(data.toString());
-            bw.close();
+            bw.write(sb.toString());
+            bw.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Print csv to program
+        System.out.println(sb.toString());
     }
 
     public static void loadData() {
