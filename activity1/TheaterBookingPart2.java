@@ -10,6 +10,7 @@ public class TheaterBookingPart2 {
         theater[0][0] = 1;
 
         System.out.println("\nTheater Seating Chart (|-| = Available, |x| = Booked):");
+
         // 4. Use nested loops to print the seating chart
         int seatBookCount = 0; // initialize for counting of available seats
         String seat = " ";
@@ -27,3 +28,5 @@ public class TheaterBookingPart2 {
 
         // 5. Count and print the total number of booked seats
         System.out.println("The total number of booked seats are: " + seatBookCount);
+    }
+}
