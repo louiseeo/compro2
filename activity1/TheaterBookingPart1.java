@@ -1,8 +1,5 @@
-import java.util.Scanner;
-
 public class TheaterBookingPart1 {
 	public static void main(String[] args) {
-		System.out.println("PART 1: Single Row");
 		// 1. Declare and initialize the 1D array for a single row
 		int[] theaterRow = new int[8];
 
