@@ -1,4 +1,5 @@
-        System.out.println("\n\nPART 2: Multiple Rows");
+public class TheaterBookingPart2 {
+    public static void main(String[] args) {
         // 1. Declare and initialize the 2D array for the theater
         int[][] theater = new int[5][8]; // 5 rows, 8 columns
 
@@ -57,7 +58,7 @@
 
                 if (availableCount > 0) {
                     // Pick a random available seat
-                    int randomPick = (int) (Math.random() * availableCount);
+                    int randomPick = (int)(Math.random() * availableCount);
                     int counter = 0;
                     boolean booked = false;
 
