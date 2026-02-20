@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-//import java.util.List;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.BufferedReader;
@@ -12,27 +11,27 @@ public class AttendanceApp {
 		ArrayList<Student> studentList = new ArrayList<>(); // initialize student arraylist
 
 		// add students
+		addStudent(studentList, "Sarah Discaya");
 		addStudent(studentList, "Sara Duterte");
 		addStudent(studentList, "Leni Robredo");
-		addStudent(studentList, "Sarah Discaya");
 
 		// record their attendance
+		recordAttendance(studentList, "Sarah Discaya", 1);
+		recordAttendance(studentList, "Sarah Discaya", 1);
+		recordAttendance(studentList, "Sarah Discaya", 0);
 		recordAttendance(studentList, "Sara Duterte", 0);
 		recordAttendance(studentList, "Sara Duterte", 0);
 		recordAttendance(studentList, "Sara Duterte", 1);
 		recordAttendance(studentList, "Leni Robredo", 1);
 		recordAttendance(studentList, "Leni Robredo", 1);
 		recordAttendance(studentList, "Leni Robredo", 1);
-		recordAttendance(studentList, "Sarah Discaya", 1);
-		recordAttendance(studentList, "Sarah Discaya", 1);
-		recordAttendance(studentList, "Sarah Discaya", 0);
 
 		recordAttendance(studentList, "Bongbong Marcos", 0); // record a non-existing student
 
 		saveStudents(studentList, "attendance.txt"); // save students to text file
 
 		ArrayList<Student> loadedStudents = loadStudents("attendance.txt"); // load records from file
-		
+
 		displayAllStudents(loadedStudents); // display all students
 
 		loadStudents("data.txt"); // try a non-existing file for error handling
@@ -70,7 +69,8 @@ public class AttendanceApp {
 
 	// Method that returns representation of students
 	public static String getDisplayInfo(Student student) {
-		return ("Name: " + student.name + ", Attendance: " + String.format("%.2f", getAttendancePercentage(student)) + "%");
+		return ("Name: " + student.name + ", Attendance: " + String.format("%.2f", getAttendancePercentage(student))
+				+ "%");
 	}
 
 	// Method that will display the overall info of students
@@ -120,7 +120,7 @@ public class AttendanceApp {
 				students.add(s); // add the student in the list
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("Error: " + filename + " is not found");
+			System.out.println("Error: " + filename + " is not found!");
 
 		} catch (IOException e) {
 			e.printStackTrace();
