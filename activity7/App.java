@@ -25,7 +25,7 @@ public class App {
             int choice = sc.nextInt();
             sc.nextLine();
 
-            // Cases
+            // Conditions
             switch (choice) {
                 case 1:
                     System.out.print("Enter your name: ");
