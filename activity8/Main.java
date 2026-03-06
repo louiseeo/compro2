@@ -28,10 +28,9 @@ public class Main {
         else
             System.out.println("The specified rectangle is not inside the rectangle.");
             
-        
-        //System.out.println("The rectangle is insi"cont);
+        //Check if rectang
 
-        //boolean 
+
     }
     
 }
