@@ -1,0 +1,25 @@
+JSON - JavaScript Object Notation
+ - alternative CSV
+
+
+ CSV
+ Name,Breed,Age,Color
+ Hades,Aspin,4,Brown
+ Butter,Shih Tzu,1,White
+
+ JSON
+ [
+  {
+    "name":"Hades",
+    "breed": "Aspin",
+    "age": 4,
+    "color": "Brown"
+  },
+  {
+    "name":"Butter",
+    "breed": "Shih Tzu",
+    "age": 1,
+    "color": "White"
+  }
+
+]

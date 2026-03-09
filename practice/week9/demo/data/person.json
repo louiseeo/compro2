@@ -1,0 +1,12 @@
+{
+    "firstName": "Louise",
+    "lastName": "Madriaga",
+    "age": 19,
+    "emailAddress": "louisenicole.madriaga@lorma.edu",
+    "phoneNumber": "09196585436",
+    "dateOfBirth": "2007-01-25",
+    "homeAddress": "Canada Str, Dulao, Aringay, La Union",
+    "isEmployed": "false",
+    "nationality": "Filipino",
+    "gender": "Female"
+}
