@@ -50,9 +50,12 @@ public class Subject {
     // Add overriding
     @Override
     public String toString(){
-        return subjectName + " | Prelim: " + prelims + " | Midterm: " + midterms + " | Final: " + finals; 
+        return String.format("""
+                Subject: %s
+                Prelims: %f
+                Midterms: %f
+                Finals: %f
+                """, subjectName, prelims, midterms, finals);
     }
-
     
-
 }
