@@ -14,7 +14,7 @@ import java.util.Scanner;
 import java.lang.reflect.Type;
 
 /**
- * Grade management system with JSON persistence.
+ * Grade management system with JSON.
  * Enter, display, auto-save/load grades for 3 subjects.
  */
 public class GradeSystem {
@@ -28,6 +28,7 @@ public class GradeSystem {
      * Main menu: [1] Enter [2] Display [0] Exit+Save
      */
     public static void main(String[] args) {
+        // load .json file
         try {
             deserializeMultipleJsonObjects();
         } catch (IOException e) {
