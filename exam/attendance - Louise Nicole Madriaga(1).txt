@@ -1,0 +1,3 @@
+Sarah Discaya,1,1,0
+Sara Duterte,0,0,1
+Leni Robredo,1,1,1
