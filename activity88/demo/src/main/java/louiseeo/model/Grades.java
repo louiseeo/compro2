@@ -1,4 +1,4 @@
-package com.louiseeo.model;
+package louiseeo.model;
 
 /**
  * This class is used to represent a Grades object with its name and grades for
@@ -6,7 +6,7 @@ package com.louiseeo.model;
  * 
  * @author Louiseeo
  */
-public class Grades {
+    public class Grades {
     private String subject;
     private double prelim;
     private double midterm;

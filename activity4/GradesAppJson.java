@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class GradesApp {
+public class GradesAppJson {
     // For counting of subjects
     static int count = 0; 
     // Arrays to store subject names and its grades
