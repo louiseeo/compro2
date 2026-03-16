@@ -9,31 +9,26 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.lang.reflect.Type;
 
 /**
  * Grade management system with JSON.
- * Enter, display, auto-save/load grades for 3 subjects.
+ * Enter, display, auto-save/load grades for user-given subjects.
  */
 public class GradeSystem {
-    // Declare arrays for subjects, terms, and grades
-    static double[][] grades = new double[3][3];
-    static String[] subjects = { "COMPRO2", "DSA", "OOP" };
-    static String[] terms = { "Prelim", "Midterm", "Final" };
-    static Scanner input = new Scanner(System.in);
+    // Initialize static fields
+    static List<Grades> gradeList = new ArrayList<>();
+    static Scanner sc = new Scanner(System.in);
 
     /**
      * Main menu: [1] Enter [2] Display [0] Exit+Save
      */
     public static void main(String[] args) {
         // load .json file
-        try {
-            deserializeMultipleJsonObjects();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        gradeList = loadGrades();
 
         // Start main menu loop
         while (true) {
@@ -45,7 +40,16 @@ public class GradeSystem {
                     """);
 
             System.out.print("Enter choice: ");
-            int choice = input.nextInt();
+            int choice;
+
+            // Validate the choice
+            try {
+                choice = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Enter 0, 1, or 2 only.");
+                sc.nextLine();
+                continue;
+            }
 
             // Switch statement for main menu choices
             switch (choice) {
@@ -56,13 +60,9 @@ public class GradeSystem {
                     displayGrades(); // calls method for choice 2
                     break;
                 case 0:
-                    try {
-                        serializeMultipleJsonObject();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    saveGrades(); // auto-save grades to json
                     System.out.println("Exiting program... Goodbye!");
-                    input.close();
+                    sc.close();
                     System.exit(0); // stops the program
                     break;
                 default: // if user entered an invalid choice
@@ -72,129 +72,138 @@ public class GradeSystem {
         }
     }
 
-    // Method for entering grades
+    /**
+     * Allows the user to enter grades for new subjects.
+     * For each subject, prompts for Prelim, Midterm, and Final grades.
+     * Validates the nested menu to only enter 1 or 0
+     * User can enter multiple subjects or return to the main menu.
+     */
     private static void enterGrades() {
         while (true) {
             System.out.println("""
-                    \nEnter grade for:
-                    [1] COMPRO2
-                    [2] DSA
-                    [3] OOP
-                    [0] Go back
+                    [1] Enter subject
+                    [0] Return to menu
                     """);
+            System.out.print("Choice: ");
 
-            System.out.print("Enter choice: ");
-            int subChoice = input.nextInt();
-
-            // switch statement for the sub-choice
-            switch (subChoice) {
-                case 1:
-                    enterGradesForSubject(0);
-                    break;
-                case 2:
-                    enterGradesForSubject(1);
-                    break;
-                case 3:
-                    enterGradesForSubject(2);
-                    break;
-                case 0:
-                    System.out.println("Returning to Main Menu...");
-                    return; // exits sub-menu
-                default:
-                    System.out.println("Invalid subject choice. Try again.");
-                    break;
+            int c;
+            try {
+                c = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Choose 1 or 0.\n");
+                sc.nextLine(); // clear invalid input
+                continue;
             }
-        }
-    }
 
-    // Helper method for entering grades for a specific subject terms
-    private static void enterGradesForSubject(int subjectIndex) {
-        System.out.println("\nEnter grades for " + subjects[subjectIndex]);
-        for (int j = 0; j < terms.length; j++) {
-            while (true) {
-                System.out.print(terms[j] + ": ");
-                if (input.hasNextDouble()) {
-                    double grade = input.nextDouble();
-                    if (grade >= 0 && grade <= 100) {
-                        grades[subjectIndex][j] = grade; // save valid grade
-                        break; // move to next term
-                    } else {
-                        System.out.println("Invalid grade! Enter 0–100 only.");
-                    }
-                } else {
-                    System.out.println("Invalid input! Enter a number.");
-                    input.next();
+            switch (c) {
+                case 1: {
+                    System.out.print("Enter name of subject: ");
+                    sc.nextLine();
+                    String subject = sc.nextLine();
+
+                    double prelim = checkGrades("Prelim");
+                    double midterm = checkGrades("Midterm");
+                    double finals = checkGrades("Final");
+
+                    gradeList.add(new Grades(subject, prelim, midterm, finals));
+                    System.out.println("Subject added successfully!\n");
                 }
+                    break;
+                case 0: {
+                    return; // go back to main menu
+                }
+                default:
+                    System.out.println("Invalid input! Choose 1 or 0.\n");
+                    break;
             }
         }
-        System.out.println("Grades saved...");
     }
 
-    // Method for displaying grades
+    /**
+     * Validates input to ensure it is a number between 1 and 100.
+     *
+     * @param term the term name (e.g., "Prelim", "Midterm", "Final")
+     * @return the validated grade as a double
+     */
+
+    private static double checkGrades(String term) {
+        double grade;
+        while (true) {
+            System.out.print(term + ": ");
+            try {
+                grade = sc.nextDouble();
+                if (grade >= 0 && grade <= 100) {
+                    return grade;
+                } else {
+                    System.out.println("Invalid grade! Enter 1-100 only.\n");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Enter a number from 1 to 100 only.");
+                sc.nextLine();
+            }
+        }
+    }
+
+    /**
+     * Displays all entered grades in a formatted table.
+     * If no grades exist, displays a message indicating no grades are available.
+     */
     private static void displayGrades() {
+        if (gradeList.isEmpty()) {
+            System.out.println("No grades available yet.");
+            return;
+        }
+
         System.out.println("\n                  GRADE TABLE");
         System.out.println("------------------------------------------------");
-        System.out.printf("%-11s %-11s %-11s %-11s\n",
+        System.out.printf("%-10s %-11s %-11s %-11s\n",
                 "Subject", "Prelim", "Midterm", "Final");
         System.out.println("------------------------------------------------");
 
-        for (int i = 0; i < subjects.length; i++) {
-            System.out.printf("%-12s", subjects[i]);
-            for (int j = 0; j < terms.length; j++) {
-                System.out.printf("%-12.2f", grades[i][j]);
-            }
-            System.out.println();
+        for (Grades g : gradeList) {
+            System.out.printf("%-10s %-11.2f %-11.2f %-11.2f\n", g.getSubject(), g.getPrelim(), g.getMidterm(),
+                    g.getFinals());
         }
+
         System.out.println("------------------------------------------------");
     }
 
     /**
      * Saves all grades to JSON file.
-     * Converts 2D grades array → List<Grades> → "activity8/demo/data/grades.json"
+     * File path: "activity8/demo/data/grades.json"
+     * Uses Gson with pretty printing.
      * 
      * @throws IOException if file write fails
      */
-    public static void serializeMultipleJsonObject() throws IOException {
-        List<Grades> gradeList = new ArrayList<>();
-        for (int i = 0; i < subjects.length; i++) {
-            Grades g = new Grades(subjects[i], grades[i][0], grades[i][1], grades[i][2]);
-            gradeList.add(g);
-        }
-        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-        FileWriter fw = new FileWriter("activity8/demo/data/grades.json");
-        gson.toJson(gradeList, fw);
-        fw.close();
 
-        System.out.println("Grades saved to JSON!");
+    public static void saveGrades() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        try (FileWriter fw = new FileWriter("activity8/demo/data/grades.json")) {
+            gson.toJson(gradeList, fw);
+            System.out.println("Grades saved to JSON!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
-     * Loads grades from JSON file into 2D grades array.
-     * "activity8/demo/data/grades.json" → List<Grades> → grades[i][j]
+     * Loads grades from a JSON file ("activity8/demo/data/grades.json").
      * 
+     * @return List<Grades> containing the loaded grades
      * @throws IOException if file read fails
      */
-    public static void deserializeMultipleJsonObjects() throws IOException {
-        FileReader fr = new FileReader("activity8/demo/data/grades.json");
-
-        Type gradesListType = new TypeToken<ArrayList<Grades>>() {
-        }.getType();
-
-        Gson gson = new Gson();
-        List<Grades> gr = gson.fromJson(fr, gradesListType);
-
-        fr.close();
-
-        for (Grades g : gr) {
-            int i = 0;
-            if (g.getSubject().equals("DSA"))
-                i = 1;
-            if (g.getSubject().equals("OOP"))
-                i = 2;
-            grades[i][0] = g.getPrelim();
-            grades[i][1] = g.getMidterm();
-            grades[i][2] = g.getFinals();
+    public static List<Grades> loadGrades() {
+        List<Grades> gradeList = new ArrayList<>();
+        try (FileReader fr = new FileReader("activity8/demo/data/grades.json")) {
+            Gson gson = new Gson();
+            Type gradesListType = new TypeToken<ArrayList<Grades>>() {
+            }.getType();
+            List<Grades> gr = gson.fromJson(fr, gradesListType);
+            if (gr != null)
+                gradeList = gr;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
+        return gradeList;
     }
 }

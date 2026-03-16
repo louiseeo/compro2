@@ -1,20 +1,8 @@
 [
   {
-    "subject": "COMPRO2",
-    "prelim": 96.0,
-    "midterm": 94.3,
-    "finals": 92.1
-  },
-  {
-    "subject": "DSA",
-    "prelim": 96.0,
-    "midterm": 94.3,
-    "finals": 92.1
-  },
-  {
-    "subject": "OOP",
-    "prelim": 96.0,
-    "midterm": 94.3,
-    "finals": 92.1
+    "subject": "hh",
+    "prelim": 99.0,
+    "midterm": 99.0,
+    "finals": 99.0
   }
 ]
