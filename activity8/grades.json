@@ -1,6 +1,20 @@
 [
   {
-    "subject": "hh",
+    "subject": "COMPRO1",
+    "prelim": 99.0,
+    "midterm": 99.0,
+    "finals": 99.0
+  },
+
+  {
+    "subject": "OOP",
+    "prelim": 99.0,
+    "midterm": 99.0,
+    "finals": 99.0
+  },
+
+  {
+    "subject": "DSA",
     "prelim": 99.0,
     "midterm": 99.0,
     "finals": 99.0
