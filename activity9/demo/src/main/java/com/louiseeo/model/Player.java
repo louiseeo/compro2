@@ -1,12 +1,12 @@
-package main.java.com.louiseeo.model;
+package com.louiseeo.model;
 
 public class Player {
     private String name;
-    private int highScore;
+    private int score;
 
-    public Player(String name, int highScore) {
+    public Player(String name, int score) {
         this.name = name;
-        this.highScore = highScore;
+        this.score = score;
     }
     public Player(){}
 
@@ -16,14 +16,18 @@ public class Player {
     public void setName(String name) {
         this.name = name;
     }
-    public int getHighScore() {
-        return highScore;
+    public int getScore() {
+        return score;
     }
-    public void setHighScore(int highScore) {
-        this.highScore = highScore;
+    public void setScore(int score) {
+        this.score = score;
     }
 
-    
-
-
+    @Override
+    public String toString(){
+        return String.format("""
+                Player name: %s
+                Score: %d
+                """, name, score);
+    }
 }

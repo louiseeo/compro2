@@ -1,24 +1,28 @@
 package com.louiseeo;
 
-/*import com.google.gson.Gson;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-*/
+import com.louiseeo.model.Player;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.lang.reflect.Type;
 
 public class HangmanGame {
     static Scanner sc = new Scanner(System.in); // Static scanner for accesing of all methods
 
-    public static void main(String[] args) {
+    static List<Player> players = new ArrayList<>();
 
-        String[] playerNames = new String[50]; // for storing number of players
-        int[] playerScores = new int[50]; // for storing player scores
+    public static void main(String[] args) {
+        players = loadPlayers("activity9/demo/data/leaderboard.json");
+
         int playerCount = 0; // for storing number of players that will play
 
         int maxIncorrect = 8; // max number of wrong guesses
@@ -27,9 +31,54 @@ public class HangmanGame {
         boolean continueGame = true;
 
         while (continueGame) {
-            // get the name of the player
-            String name = getPlayerName();
-            playerNames[playerCount] = name;
+            // check if player would like to sign in
+            System.out.println("""
+                    \nWelcome to Hangman game!
+                    [1] Sign in
+                    [2] New Player
+                    """);
+
+            boolean val = false;
+            Player p = null;
+
+            while (!val) {
+                System.out.print("Choice: ");
+                int choice1 = sc.nextInt();
+                sc.nextLine();
+
+                if (choice1 == 1) {
+                    String name = getPlayerName();
+                    p = findPlayer(players, name);
+                    if (p != null) {
+                        System.out.println("Welcome back, " + p.getName() + "!\n");
+                        val = true;
+                    } else {
+                        System.out.println("Player not found. Try again.\n");
+                    }
+                } else if (choice1 == 2) {
+                    boolean exist = false;
+                    while (!exist) {
+                        String name = getPlayerName();
+                        p = findPlayer(players, name);
+
+                        if (p == null) {
+                            System.out.println("Creating new account...\n");
+                            p = new Player(name, 0);
+                            players.add(p);
+                            val = true;
+                            exist = true; // exit inner loop
+                        } else {
+                            System.out.println("The name already exists. Try another.\n");
+                            // loop continues, asks for another name
+                        }
+                    }
+
+                }
+
+                else {
+                    System.out.println("Invalid choice.\n");
+                }
+            }
 
             // make user choose what difficulty to play
             System.out.println("""
@@ -38,36 +87,44 @@ public class HangmanGame {
                         [2] Medium
                         [3] Hard
                     """);
-            System.out.print("Choice: ");
-            int choice = sc.nextInt();
 
-            while (true) {
-                String filename;
-                switch (choice) {
+            String filename = "";
+            boolean valid = false;
+            while (!valid) {
+                System.out.print("Choice: ");
+                int choice2 = sc.nextInt();
+                sc.nextLine();
+
+                switch (choice2) {
                     case 1:
-                        filename = "easy.txt";
+                        filename = "activity9/demo/data/easy.txt";
+                        valid = true;
                         break;
                     case 2:
-                        filename = "medium.txt";
+                        filename = "activity9/demo/data/medium.txt";
+                        valid = true;
                         break;
                     case 3:
-                        filename = "hard.txt";
+                        filename = "activity9/demo/data/hard.txt";
+                        valid = true;
                         break;
                     default:
-                        System.out.println("Invalid choice! Pick from 1 to 3.");
-                        break;
+                        System.out.println("Invalid choice2! Pick from 1 to 3.");
                 }
             }
+
             // play the game and get the score
-            int score = playGame(loadWordbank(name), maxIncorrect, maxScore);
-            playerScores[playerCount] = score;
+            int score = playGame(loadWordbank(filename), maxIncorrect, maxScore);
+            p.setScore(p.getScore() + score);
             playerCount++;
 
             // ask if another player wants to play
             continueGame = anotherPlayer();
         }
+
         // for displaying the leaderboard
-        displayLeaderboard(playerNames, playerScores, playerCount);
+        displayLeaderboard(players);
+        savePlayers("activity9/demo/data/leaderboard.json", players);
     }
 
     // Get the name of the player
@@ -78,8 +135,13 @@ public class HangmanGame {
 
     // Pick a random word from the wordbank array
     public static String selectRandomWord(List<String> words) {
-        int indexWord = (int) (Math.random() * words.size()); // A random word is picked from the wordbank
-        return words[indexWord];
+        if (words.isEmpty()) {
+            System.out.println("Wordbank is empty or file not found!");
+            return null;
+        }
+
+        int indexWord = (int) (Math.random() * words.size());
+        return words.get(indexWord);
     }
 
     // Make the hiddenWord word change into asterisk
@@ -93,8 +155,13 @@ public class HangmanGame {
 
     // The game play
     public static int playGame(List<String> wordBank, int maxIncorrect, int maxScore) {
+
         // Calls the selectRandomWord to get a random word
         String word = selectRandomWord(wordBank);
+
+        if (word == null) {
+            return 0;
+        }
 
         // Initializes the hiddenWord word with asterisks
         String hiddenWord = initializeHiddenWord(word);
@@ -125,8 +192,7 @@ public class HangmanGame {
             boolean correct = ifGuessCorrect(word, guess); // Checks if guess is correct
 
             if (correct) {
-                hiddenWord = updateHiddenWord(word, hiddenWord, guess); // Updates hiddenWord word to reveal the letter
-                                                                        // guessed
+                hiddenWord = updateHiddenWord(word, hiddenWord, guess); // Updates hiddenWord word to reveal the letter                                            
                 score = awardPointForCorectLetter(true, score); // A point is made if user guessed a letter correct
             } else {
                 System.out.println(guess + " is not in the word"); // Prints if the guess is incorrect
@@ -245,29 +311,24 @@ public class HangmanGame {
     }
 
     // Display the arranged leaderboard from highest to lowest
-    public static void displayLeaderboard(String[] names, int[] scores, int count) {
+    public static void displayLeaderboard(List<Player> players) {
         System.out.println("\n===== LEADERBOARD =====");
 
-        // Arrange from highest to lowest score
-        for (int i = 0; i < count - 1; i++) { // Loop for frequency of sorting process
-            for (int j = 0; j < count - i - 1; j++) { // Compares 2 player each time
-                if (scores[j] < scores[j + 1]) { // Check ifcurrent players score is higher than the other one
-                    // Swap scores
-                    int tempScore = scores[j]; // Stores current score temporarily
-                    scores[j] = scores[j + 1]; // Moves the higher score forward
-                    scores[j + 1] = tempScore; // Put the lower score in next position
-
-                    // Swap names
-                    String tempName = names[j]; // Stores current name temporarily
-                    names[j] = names[j + 1]; // Moves the name with higher score
-                    names[j + 1] = tempName; // Put other name in next position
+        // Bubble sort style, just like your original code
+        for (int i = 0; i < players.size() - 1; i++) {
+            for (int j = 0; j < players.size() - i - 1; j++) {
+                if (players.get(j).getScore() < players.get(j + 1).getScore()) {
+                    // Swap players
+                    Player temp = players.get(j);
+                    players.set(j, players.get(j + 1));
+                    players.set(j + 1, temp);
                 }
             }
         }
 
         // Display sorted leaderboard
-        for (int i = 0; i < count; i++) {
-            System.out.println(names[i] + " - " + scores[i] + " points");
+        for (Player p : players) {
+            System.out.println(p.getName() + " - " + p.getScore() + " points");
         }
     }
 
@@ -281,10 +342,46 @@ public class HangmanGame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return words;
+    }
 
-        if (!words.isEmpty()) {
-            Random rand = new Random();
+    public static Player findPlayer(List<Player> players, String name) {
+        for (Player p : players) {
+            if (p.getName().equalsIgnoreCase(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
 
+    public static List<Player> loadPlayers(String filename) {
+        List<Player> playerList = new ArrayList<>();
+
+        try (FileReader fr = new FileReader(filename)) {
+            Gson gson = new Gson();
+
+            Type playerListType = new TypeToken<List<Player>>() {}.getType();
+
+            List<Player> pl = gson.fromJson(fr, playerListType);
+
+            if (pl != null) {
+                playerList = pl;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return playerList;
+    }
+
+    public static void savePlayers(String filename, List<Player> players) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+
+        try (FileWriter fw = new FileWriter(filename)) {
+            gson.toJson(players, fw);
+            System.out.println("\nPlayers saved to JSON!");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

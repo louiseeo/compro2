@@ -75,7 +75,7 @@ public class GradeSystem {
     /**
      * Allows the user to enter grades for new subjects.
      * For each subject, prompts for Prelim, Midterm, and Final grades.
-     * Validates the nested menu to only enter 1 or 0
+     * Validates the nested menu to only enter 1 or 0.
      * User can enter multiple subjects or return to the main menu.
      */
     private static void enterGrades() {
