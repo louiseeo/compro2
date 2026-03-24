@@ -82,7 +82,7 @@ public class HangmanGame {
         System.out.println("""
                 \nWelcome to Hangman Game!
                 [1] Sign in
-                [2] New Player
+                [2] Sign up
                 """);
 
         Player p = null;
@@ -104,11 +104,18 @@ public class HangmanGame {
                 while (true) {
                     String name = getPlayerName().trim();
                     if (name.isEmpty()) {
-                        System.out.println("Name cannot be empty.");
+                        System.out.println("Name cannot be empty.\n");
                         continue;
                     }
                     p = findPlayer(players, name);
                     if (p != null) {
+                        System.out.print("Enter password: ");
+                        String pw = sc.nextLine();
+
+                        if (!pw.equals(p.getPassword())) {
+                            System.out.println("Incorrect password! Try again.\n");
+                            continue;
+                        }
                         System.out.println("Welcome back, " + p.getName() + "!\n");
                         val = true;
                         break;
@@ -121,13 +128,19 @@ public class HangmanGame {
                     String name = getPlayerName().trim();
 
                     if (name.isEmpty()) {
-                        System.out.println("Name cannot be empty.");
+                        System.out.println("Name cannot be empty.\n");
                         continue;
                     }
                     p = findPlayer(players, name);
                     if (p == null) {
-                        System.out.println("Creating new account...");
-                        p = new Player(name, 0);
+                        System.out.print("Set password: ");
+                        String pw = sc.nextLine();
+
+                        if (pw.isEmpty()) {
+                            System.out.println("Password cannot be empty.\n");
+                        }
+                        System.out.println("\nCreating new account...");
+                        p = new Player(name, 0, pw);
                         players.add(p);
                         System.out.println("Welcome to the game, " + p.getName() + "!\n");
                         val = true;
