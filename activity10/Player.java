@@ -3,10 +3,12 @@ package com.louiseeo.model;
 public class Player {
     private String name;
     private int score;
+    private String password;
 
-    public Player(String name, int score) {
+    public Player(String name, int score, String password) {
         this.name = name;
         this.score = score;
+        this.password = password;
     }
     public Player(){}
 
@@ -21,6 +23,12 @@ public class Player {
     }
     public void setScore(int score) {
         this.score = score;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
