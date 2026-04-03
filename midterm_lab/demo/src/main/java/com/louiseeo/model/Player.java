@@ -2,9 +2,9 @@ package com.louiseeo.model;
 
 public class Player {
     private Account account;
-    private String choice;
+    private int choice;
 
-    public Player(Account account, String choice) {
+    public Player(Account account, int choice) {
         this.account = account;
         this.choice = choice;
     }
@@ -13,7 +13,7 @@ public class Player {
         return account;
     }
 
-    public String getChoice() {
+    public int getChoice() {
         return choice;
     }
 
@@ -21,12 +21,12 @@ public class Player {
         return account.getUsername();
     }
 
-    public void setChoice(String choice) {
+    public void setChoice(int choice) {
         this.choice = choice;
     }
 
     public void resetChoice() {
-        this.choice = null;
+        this.choice = -1;
     }
     
 }

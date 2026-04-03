@@ -6,11 +6,11 @@ public class Account {
     private int wins;
     private int losses;
 
-    public Account(String username, String password, int wins, int losses) {
+    public Account(String username, String password) {
         this.username = username;
         this.password = password;
-        this.wins = wins;
-        this.losses = losses;
+        this.wins = 0;
+        this.losses = 0;
     }
 
     public String getUsername() {
@@ -39,6 +39,12 @@ public class Account {
 
     public String getSummary() {
         return "Wins: " + wins + " || Losses: " + losses;
+    }
+
+    public double getWinPercentage() {
+        if (wins + losses == 0)
+            return 0;
+        return (double) wins / (wins + losses) * 100;
     }
 
 }
