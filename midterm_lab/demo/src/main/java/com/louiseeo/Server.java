@@ -1,11 +1,12 @@
 package com.louiseeo;
 
 import com.louiseeo.model.Account;
+import com.louiseeo.model.GameMove;
 import com.louiseeo.model.GameResult;
+import com.louiseeo.model.GameSession;
 import com.louiseeo.model.Player;
 import com.louiseeo.service.ClientService;
 import com.louiseeo.service.FileService;
-import com.louiseeo.service.GameService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,10 +28,11 @@ import java.util.List;
 public class Server {
     static List<Account> accs = new ArrayList<>();
 
-     /**
+    /**
      * Main method. Starts the server, accepts two clients,
      * authenticates both, runs the game loop for 10 rounds,
      * displays leaderboard, and saves results.
+     *
      */
     public static void main(String[] args) {
         int port = 8000;
@@ -40,9 +42,9 @@ public class Server {
         try (ServerSocket server = new ServerSocket(port)) {
 
             // Accept Player 1 and create streams
-            Socket player1 = server.accept();
-            PrintWriter out1 = new PrintWriter(player1.getOutputStream(), true);
-            BufferedReader in1 = new BufferedReader(new InputStreamReader(player1.getInputStream()));
+            Socket p1Socket = server.accept();
+            PrintWriter out1 = new PrintWriter(p1Socket.getOutputStream(), true);
+            BufferedReader in1 = new BufferedReader(new InputStreamReader(p1Socket.getInputStream()));
             System.out.println("Player 1 connected!");
 
             // Load accounts and authenticate Player 1
@@ -50,54 +52,73 @@ public class Server {
             Account a1 = ClientService.playerLogin(accs, in1, out1);
 
             // Accept Player 2 and create streams
-            Socket player2 = server.accept();
-            PrintWriter out2 = new PrintWriter(player2.getOutputStream(), true);
-            BufferedReader in2 = new BufferedReader(new InputStreamReader(player2.getInputStream()));
+            Socket p2Socket = server.accept();
+            PrintWriter out2 = new PrintWriter(p2Socket.getOutputStream(), true);
+            BufferedReader in2 = new BufferedReader(new InputStreamReader(p2Socket.getInputStream()));
             System.out.println("Player 2 connected!");
-            
-            // Make Player 2 login
+
+            // Authenticate Player 2
             Account a2 = ClientService.playerLogin(accs, in2, out2);
 
-            // Create Player and GameService objects
-            Player p1 = new Player(a1);
-            Player p2 = new Player(a2);
-            GameService gs = new GameService(p1, p2);
+            // Create Player objects from authenticated accounts
+            Player p1 = new Player(a1.getUsername());
+            Player p2 = new Player(a2.getUsername());
+
+            // Create GameSession
+            GameSession gs = new GameSession(p1, p2);
 
             // Notify both players game is starting
             out1.println("\nBoth players connected! Game starting...");
             out2.println("\nBoth players connected! Game starting...");
 
-            // Game loop 
+            // Game loop — 10 rounds
             for (int round = 1; round <= 10; round++) {
-                // Announce round number to two players
-                out1.println("\n=== Round " + round + " of 10 ===");
-                out2.println("\n=== Round " + round + " of 10 ===");
 
-                // get choice from both players
-                int c1 = ClientService.handleChoice(in1, out1);
-                int c2 = ClientService.handleChoice(in2, out2);
+                // Announce round number to both players
+                out1.println("\n============== Round " + round + " of 10 ==============");
+                out2.println("\n============== Round " + round + " of 10 ==============");
 
-                // Set choices on players
-                p1.setChoice(c1);
-                p2.setChoice(c2);
+                // Get GameMove from both players
+                GameMove m1 = ClientService.handleChoice(in1, out1);
+                GameMove m2 = ClientService.handleChoice(in2, out2);
 
-                // Determine winner
+                // Set moves on Player objects
+                p1.setCurrentMove(m1);
+                p2.setCurrentMove(m2);
+
+                // Determine round winner and update scores
                 GameResult result = gs.determineWinner();
 
                 // Send result to both players
                 out1.println(gs.formatResult(result));
                 out2.println(gs.formatResult(result));
 
-                // Reset round
-                gs.resetRound();
+                // Show current scores
+                out1.println("Score -> " + p1.getName() + ": " + p1.getScore() + " | " + p2.getName() + ": " + p2.getScore());
+                out2.println("Score -> " + p1.getName() + ": " + p1.getScore() + " | " + p2.getName() + ": " + p2.getScore());
 
+                // Reset moves for next round
+                gs.resetRound();
             }
 
-            // Display leaderboard to both
+            // Update accounts based on session scores
+            if (p1.getScore() > p2.getScore()) {
+                a1.incrementWins();
+                a2.incrementLosses();
+            } else if (p2.getScore() > p1.getScore()) {
+                a2.incrementWins();
+                a1.incrementLosses();
+            }
+
+            // Announce match over
+            out1.println("\n------------------- MATCH OVER ------------------");
+            out2.println("\n------------------- MATCH OVER ------------------");
+
+            // Display leaderboard to both players
             ClientService.displayLeaderboard(accs, out1);
             ClientService.displayLeaderboard(accs, out2);
 
-            // Save accounts
+            // Save updated accounts to JSON
             FileService.saveAccounts("data/accounts.json", accs, out1);
             FileService.saveAccounts("data/accounts.json", accs, out2);
 

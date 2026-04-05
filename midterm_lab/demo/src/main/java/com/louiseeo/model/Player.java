@@ -1,63 +1,35 @@
 package com.louiseeo.model;
 
 /**
- * Represents an active player during a game session.
- * Wraps an Account and tracks the player's current
- * round choice. Choice is not saved persistently.
+ * Represents an active player in a game session.
+ * All fields are private and strictly encapsulated.
  *
  * @author louiseeo
  */
 public class Player {
-    private Account account;
-    private int choice = -1;
+    private String name;
+    private int score;
+    private GameMove currentMove;
 
     /**
-     * Constructs a Player linked to the given Account.
+     * Constructs a Player with a name.
      *
-     * @param account : the logged in Account for this player
+     * @param name : the player's username
      */
-    public Player(Account account) {
-        this.account = account;
+    public Player(String name) {
+        this.name = name;
+        this.score = 0;
+        this.currentMove = null;
     }
+
+    public String getName() { return name; }
+    public int getScore() { return score; }
+    public GameMove getCurrentMove() { return currentMove; }
+    public void setCurrentMove(GameMove move) { this.currentMove = move; }
+    public void resetMove() { this.currentMove = null; }
 
     /**
-     * Returns the Account linked to this player.
-     * @return Account object
+     * Safely increments the player's win count.
      */
-    public Account getAccount() {
-        return account;
-    }
-
-    /**
-     * Returns the player's username from their Account.
-     * @return username as String
-     */
-    public String getUsername() {
-        return account.getUsername();
-    }
-
-    /**
-     * Returns the player's current round choice.
-     * Returns -1 if no choice has been made yet.
-     * @return choice as int (0=Rock, 1=Paper, 2=Scissors)
-     */
-    public int getChoice() {
-        return choice;
-    }
-
-    /**
-     * Sets the player's choice for the current round.
-     * @param choice : 0=Rock, 1=Paper, 2=Scissors
-     */
-    public void setChoice(int choice) {
-        this.choice = choice;
-    }
-
-    /**
-     * Resets the player's choice to -1 after each round.
-     */
-    public void resetChoice() {
-        this.choice = -1;
-    }
-
+    public void incrementScore() { score++; }
 }

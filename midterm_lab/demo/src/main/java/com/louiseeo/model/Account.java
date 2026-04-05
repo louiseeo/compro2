@@ -28,6 +28,7 @@ public class Account {
 
     /**
      * Returns the player's username.
+     * 
      * @return username as String
      */
     public String getUsername() {
@@ -36,6 +37,7 @@ public class Account {
 
     /**
      * Returns the player's password.
+     * 
      * @return password as String
      */
     public String getPassword() {
@@ -44,6 +46,7 @@ public class Account {
 
     /**
      * Returns the player's total wins across all sessions.
+     * 
      * @return wins as int
      */
     public int getWins() {
@@ -52,6 +55,7 @@ public class Account {
 
     /**
      * Returns the player's total losses across all sessions.
+     * 
      * @return losses as int
      */
     public int getLosses() {
@@ -73,11 +77,24 @@ public class Account {
     }
 
     /**
+     * Returns the player's win rate as a percentage.
+     * Returns 0 if no games played yet.
+     * 
+     * @return win rate as double
+     */
+    public double getWinRate() {
+        if (wins + losses == 0)
+            return 0;
+        return (double) wins / (wins + losses) * 100;
+    }
+
+    /**
      * Returns a summary of the player's match statistics.
+     * 
      * @return formatted string showing wins and losses
      */
     public String getSummary() {
-        return "Wins: " + wins + " || Losses: " + losses;
+        return String.format("Wins: %d | Losses: %d | Win Rate: %.1f%%", wins, losses, getWinRate());
     }
 
 }

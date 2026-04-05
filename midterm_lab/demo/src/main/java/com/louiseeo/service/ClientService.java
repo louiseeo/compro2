@@ -6,7 +6,18 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import com.louiseeo.model.Account;
+import com.louiseeo.model.GameMove;
+import com.louiseeo.model.Rock;
+import com.louiseeo.model.Paper;
+import com.louiseeo.model.Scissors;
 
+/**
+ * Handles client communication for authentication,
+ * move selection, and leaderboard display.
+ * All methods are static following service pattern.
+ *
+ * @author louiseeo
+ */
 public class ClientService {
 
     /**
@@ -16,14 +27,12 @@ public class ClientService {
      * @param accounts : list of all accounts
      * @param in       : input stream to read client responses
      * @param out      : output stream to send messages to the client
-     * @return The Player object representing the logged-in or newly created player
+     * @return the logged in Account
      * @throws IOException
      */
-
     public static Account playerLogin(List<Account> accounts, BufferedReader in, PrintWriter out) throws IOException {
-        // check if player would like to sign in
         out.println("""
-                \nWelcome to the ROCK, PAPER, SCISSOR Game!
+                \nWelcome to the ROCK, PAPER, SCISSORS Game!
                 [1] Sign in
                 [2] Sign up
                 """);
@@ -37,7 +46,7 @@ public class ClientService {
             try {
                 choice1 = Integer.parseInt(in.readLine());
             } catch (NumberFormatException e) {
-                out.println("Invalid input. Enter 1 or 2.\n");
+                out.println("Invalid input. Enter 1 or 2.");
                 continue;
             }
 
@@ -45,55 +54,58 @@ public class ClientService {
                 while (true) {
                     String name = getPlayerName(in, out).trim();
                     if (name.isEmpty()) {
-                        out.println("Name cannot be empty.\n");
+                        out.println("Name cannot be empty.");
                         continue;
                     }
                     a = findPlayer(accounts, name);
                     if (a != null) {
-                        out.println("Enter password: ");
-                        String pw = in.readLine();
-
-                        if (!pw.equals(a.getPassword())) {
-                            out.println("Incorrect password! Try again.\n");
-                            continue;
+                        // Password loop — stays here until correct
+                        while (true) {
+                            out.println("\nEnter password: ");
+                            String pw = in.readLine();
+                            if (!pw.equals(a.getPassword())) {
+                                out.println("Incorrect password! Try again.");
+                                continue; // only re-asks password!
+                            }
+                            out.println("\nWelcome back, " + a.getUsername() + "!");
+                            out.println(a.getSummary());
+                            out.println("\nWaiting for another player...");
+                            val = true;
+                            break;
                         }
-                        out.println("Welcome back, " + a.getUsername() + "!\n");
-                        out.println("Waiting for another player...");
-                        val = true;
                         break;
                     } else {
-                        out.println("Player not found. Try again.\n");
+                        out.println("Player not found. Try again.");
                     }
                 }
             } else if (choice1 == 2) {
                 while (true) {
                     String name = getPlayerName(in, out).trim();
-
                     if (name.isEmpty()) {
-                        out.println("Name cannot be empty.\n");
+                        out.println("Name cannot be empty.");
                         continue;
                     }
                     a = findPlayer(accounts, name);
                     if (a == null) {
-                        out.println("Set password: ");
+                        out.println("\nSet password: ");
                         String pw = in.readLine();
-
                         if (pw.isEmpty()) {
-                            out.println("Password cannot be empty.\n");
+                            out.println("Password cannot be empty.");
+                            continue;
                         }
                         out.println("\nCreating new account...");
                         a = new Account(name, pw);
                         accounts.add(a);
-                        out.println("Welcome to the game, " + a.getUsername() + "!\n");
-                        out.println("Waiting for another player...\n");
+                        out.println("\nWelcome to the game, " + a.getUsername() + "!");
+                        out.println("\nWaiting for another player...");
                         val = true;
-                        break; // exit inner loop
+                        break;
                     } else {
-                        out.println("The name already exists. Try another.\n");
+                        out.println("The name already exists. Try another.");
                     }
                 }
             } else {
-                out.println("Invalid input. Enter 1 or 2.\n");
+                out.println("Invalid input. Enter 1 or 2.");
             }
         }
         return a;
@@ -101,48 +113,72 @@ public class ClientService {
 
     /**
      * Prompts user to enter their name.
-     * 
-     * @param in  : the input stream to read the client's response
-     * @param out : the output stream to send the prompt to the client
+     *
+     * @param in  : input stream to read the client's response
+     * @param out : output stream to send the prompt to the client
      * @return the name entered by the user
      * @throws IOException
      */
     public static String getPlayerName(BufferedReader in, PrintWriter out) throws IOException {
-        out.println("Player Name: ");
+        out.println("\nPlayer Name: ");
         return in.readLine();
     }
 
     /**
-     * Searches for a player by name in the list of accounts.
+     * Searches for an account by username.
      *
-     * @param accounts : the list of all accounts
-     * @param name     : the name of the player to search for
-     * @return the Player object if found, null otherwise
+     * @param accounts : list of all accounts
+     * @param name     : username to search for
+     * @return Account if found, null otherwise
      */
     public static Account findPlayer(List<Account> accounts, String name) {
         for (Account a : accounts) {
-            if (a.getUsername().equalsIgnoreCase(name)) {
+            if (a.getUsername().equalsIgnoreCase(name))
                 return a;
-            }
         }
         return null;
     }
 
     /**
-     * Displays the arranged leaderboard from highest to lowest score.
+     * Asks the player to enter their RPS move.
+     * Validates input and returns a GameMove object.
+     *
+     * @param in  : input stream to read client response
+     * @param out : output stream to send prompt to client
+     * @return GameMove object (Rock, Paper, or Scissors)
+     * @throws IOException
+     */
+    public static GameMove handleChoice(BufferedReader in, PrintWriter out) throws IOException {
+        while (true) {
+            out.println("Enter choice (0=Rock, 1=Paper, 2=Scissors): ");
+            try {
+                int choice = Integer.parseInt(in.readLine());
+                if (choice == 0)
+                    return new Rock();
+                if (choice == 1)
+                    return new Paper();
+                if (choice == 2)
+                    return new Scissors();
+                out.println("Invalid input! Enter 0, 1, or 2.");
+            } catch (NumberFormatException e) {
+                out.println("Invalid input! Enter 0, 1, or 2.");
+            }
+        }
+    }
+
+    /**
+     * Displays the arranged leaderboard from highest to lowest wins.
+     * Uses bubble sort to arrange accounts.
      *
      * @param accounts : the list of all accounts to display
-     * @param out : the output stream to send the leaderboard to
-     *                 the client
+     * @param out      : output stream to send the leaderboard to the client
      */
     public static void displayLeaderboard(List<Account> accounts, PrintWriter out) {
-        out.println("\n======= MATCH OVER =======");
+        out.println("\n================== LEADERBOARD ==================");
 
-        // Bubble sort style, just like your original code
         for (int i = 0; i < accounts.size() - 1; i++) {
             for (int j = 0; j < accounts.size() - i - 1; j++) {
-                if (accounts.get(j).getWins() < accounts.get(j + 1).getWins()) {
-                    // Swap accounts
+                if (accounts.get(j).getWinRate() < accounts.get(j + 1).getWinRate()) {
                     Account temp = accounts.get(j);
                     accounts.set(j, accounts.get(j + 1));
                     accounts.set(j + 1, temp);
@@ -150,33 +186,8 @@ public class ClientService {
             }
         }
 
-        // Display sorted leaderboard
         for (Account a : accounts) {
-            out.println(a.getUsername() + " - " + a.getWins() + " wins | " + a.getLosses() + " losses");
+           out.println(a.getUsername() + " - " + a.getSummary());
         }
     }
-
-    /**
-     * Asks the player to enter their RPS choice.
-     * Validates input is 0, 1, or 2.
-     *
-     * @param in  : input stream to read client response
-     * @param out : output stream to send prompt to client
-     * @return valid int choice (0, 1, or 2)
-     * @throws IOException
-     */
-    public static int handleChoice(BufferedReader in, PrintWriter out) throws IOException {
-        while (true) {
-            out.println("Enter choice (0=Rock, 1=Paper, 2=Scissors): ");
-            try {
-                int choice = Integer.parseInt(in.readLine());
-                if (choice >= 0 && choice <= 2)
-                    return choice;
-                out.println("Invalid input! Enter 0, 1, or 2.\n");
-            } catch (NumberFormatException e) {
-                out.println("Invalid input! Enter 0, 1, or 2.\n");
-            }
-        }
-    }
-
 }

@@ -38,8 +38,8 @@ public class Client {
 
                 if (message.contains("Choice") ||
                         message.contains("Player Name") ||
-                        message.contains("password") ||
-                        message.contains("Password") ||
+                        message.contains("Set password") ||
+                        message.contains("Enter password") ||
                         message.contains("Enter choice")) {
                     System.out.print("> ");
                     out.println(sc.nextLine());
