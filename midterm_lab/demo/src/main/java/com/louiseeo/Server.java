@@ -47,7 +47,7 @@ public class Server {
             BufferedReader in1 = new BufferedReader(new InputStreamReader(p1Socket.getInputStream()));
             System.out.println("Player 1 connected!");
 
-            // Load accounts and authenticate Player 1
+            // Load accounts 
             accs = FileService.loadAccounts("data/accounts.json", out1);
             Account a1 = ClientService.playerLogin(accs, in1, out1);
 
@@ -57,10 +57,10 @@ public class Server {
             BufferedReader in2 = new BufferedReader(new InputStreamReader(p2Socket.getInputStream()));
             System.out.println("Player 2 connected!");
 
-            // Authenticate Player 2
+            // Make player 2 log in
             Account a2 = ClientService.playerLogin(accs, in2, out2);
 
-            // Create Player objects from authenticated accounts
+            // Create Player objects 
             Player p1 = new Player(a1.getUsername());
             Player p2 = new Player(a2.getUsername());
 
