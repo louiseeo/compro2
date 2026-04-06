@@ -54,7 +54,7 @@ public class Server {
             System.out.println("Player 2 connected!");
 
             // Load accounts 
-            accs = FileService.loadAccounts("data/accounts.json", out1);
+            accs = FileService.loadAccounts("data/accounts.json");
             Account a1 = ClientService.playerLogin(accs, in1, out1);
 
             // Make player 2 log in
@@ -116,8 +116,7 @@ public class Server {
             ClientService.displayLeaderboard(accs, out2);
 
             // Save updated accounts to JSON
-            FileService.saveAccounts("data/accounts.json", accs, out1);
-            FileService.saveAccounts("data/accounts.json", accs, out2);
+            FileService.saveAccounts("data/accounts.json", accs);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -50,7 +50,7 @@ public class Client {
             if (e.getMessage().contains("Connection refused")) {
                 System.out.println("Cannot connect to server. Make sure the server is running!");
             } else {
-                System.out.println("Connection lost. Game ended.");
+                System.out.println("\nConnection lost. Game ended.");
             }
         }
     }

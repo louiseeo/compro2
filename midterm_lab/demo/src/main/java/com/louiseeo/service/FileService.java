@@ -28,7 +28,7 @@ public class FileService {
      * @param out      : output stream for error messages
      * @return list of Account objects loaded from file
      */
-    public static List<Account> loadAccounts(String filename, PrintWriter out) {
+    public static List<Account> loadAccounts(String filename) {
         List<Account> accounts = new ArrayList<>();
         try (FileReader fr = new FileReader(filename)) {
             Gson gson = new Gson();
@@ -49,7 +49,7 @@ public class FileService {
      * @param accounts : list of Account objects to save
      * @param out      : output stream for error messages
      */
-    public static void saveAccounts(String filename, List<Account> accounts, PrintWriter out) {
+    public static void saveAccounts(String filename, List<Account> accounts) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter fw = new FileWriter(filename)) {
             gson.toJson(accounts, fw);
