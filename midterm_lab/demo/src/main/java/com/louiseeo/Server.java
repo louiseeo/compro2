@@ -47,15 +47,15 @@ public class Server {
             BufferedReader in1 = new BufferedReader(new InputStreamReader(p1Socket.getInputStream()));
             System.out.println("Player 1 connected!");
 
-            // Load accounts 
-            accs = FileService.loadAccounts("data/accounts.json", out1);
-            Account a1 = ClientService.playerLogin(accs, in1, out1);
-
             // Accept Player 2 and create streams
             Socket p2Socket = server.accept();
             PrintWriter out2 = new PrintWriter(p2Socket.getOutputStream(), true);
             BufferedReader in2 = new BufferedReader(new InputStreamReader(p2Socket.getInputStream()));
             System.out.println("Player 2 connected!");
+
+            // Load accounts 
+            accs = FileService.loadAccounts("data/accounts.json", out1);
+            Account a1 = ClientService.playerLogin(accs, in1, out1);
 
             // Make player 2 log in
             Account a2 = ClientService.playerLogin(accs, in2, out2);
@@ -102,13 +102,10 @@ public class Server {
             }
 
             // Update accounts based on session scores
-            if (p1.getScore() > p2.getScore()) {
-                a1.incrementWins();
-                a2.incrementLosses();
-            } else if (p2.getScore() > p1.getScore()) {
-                a2.incrementWins();
-                a1.incrementLosses();
-            }
+            a1.addWins(p1.getScore());
+            a1.addLoses(p1.getScore());
+            a2.addWins(p2.getScore());
+            a2.addLoses(p2.getScore());
 
             // Announce match over
             out1.println("\n------------------- MATCH OVER ------------------");

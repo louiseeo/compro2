@@ -77,6 +77,26 @@ public class Account {
     }
 
     /**
+     * Adds the soecified amount to the player's win count.
+     * Used to record total round wins after the match.
+     * 
+     * @param amount
+     */
+    public void addWins(int amount) {
+        wins += amount;
+    }
+
+    /**
+     * Adds the soecified amount to the player's loss count.
+     * Used to record total round losses after the match.
+     * 
+     * @param amount
+     */
+    public void addLoses(int amount) {
+        losses += amount;
+    }
+
+    /**
      * Returns the player's win rate as a percentage.
      * Returns 0 if no games played yet.
      * 
