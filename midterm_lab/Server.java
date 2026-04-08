@@ -41,23 +41,23 @@ public class Server {
 
         try (ServerSocket server = new ServerSocket(port)) {
 
-            // Accept Player 1 and create streams
+            // Accept Player 1 to the server
             Socket p1Socket = server.accept();
             PrintWriter out1 = new PrintWriter(p1Socket.getOutputStream(), true);
             BufferedReader in1 = new BufferedReader(new InputStreamReader(p1Socket.getInputStream()));
             System.out.println("Player 1 connected!");
 
-            // Accept Player 2 and create streams
+            // Accept Player 2 to the server
             Socket p2Socket = server.accept();
             PrintWriter out2 = new PrintWriter(p2Socket.getOutputStream(), true);
             BufferedReader in2 = new BufferedReader(new InputStreamReader(p2Socket.getInputStream()));
             System.out.println("Player 2 connected!");
 
-            // Load accounts 
+            // Load JSON accounts 
             accs = FileService.loadAccounts("data/accounts.json");
+            
+            // Log players to the game
             Account a1 = ClientService.playerLogin(accs, in1, out1);
-
-            // Make player 2 log in
             Account a2 = ClientService.playerLogin(accs, in2, out2);
 
             // Create Player objects 
@@ -67,14 +67,14 @@ public class Server {
             // Create GameSession
             GameSession gs = new GameSession(p1, p2);
 
-            // Notify both players game is starting
+            // Notify both players that game is starting
             out1.println("\nBoth players connected! Game starting...");
             out2.println("\nBoth players connected! Game starting...");
 
-            // Game loop — 10 rounds
+            // Loop game to 10 rounds
             for (int round = 1; round <= 10; round++) {
 
-                // Announce round number to both players
+                // State round number to both players
                 out1.println("\n============== Round " + round + " of 10 ==============");
                 out2.println("\n============== Round " + round + " of 10 ==============");
 
