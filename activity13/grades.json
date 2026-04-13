@@ -1,0 +1,20 @@
+[
+  {
+    "subject": "OOP",
+    "prelim": 95.0,
+    "midterm": 94.0,
+    "finalGrade": 93.0
+  },
+  {
+    "subject": "DSA",
+    "prelim": 99.0,
+    "midterm": 98.0,
+    "finalGrade": 97.0
+  },
+  {
+    "subject": "COMPRO2",
+    "prelim": 90.0,
+    "midterm": 91.0,
+    "finalGrade": 92.0
+  }
+]
