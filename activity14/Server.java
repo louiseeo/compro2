@@ -45,4 +45,10 @@ public class Server {
         }
 
     }
+
+    public static void removeClient(ClientHandler handler) {
+            synchronized(clients) {
+            clients.remove(handler);
+        }
+        }
 }

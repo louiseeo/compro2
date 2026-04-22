@@ -1,7 +1,5 @@
 import java.io.*;
-import java.lang.invoke.StringConcatFactory;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ClientHandler implements Runnable{
     private PrintWriter out;
@@ -28,20 +26,36 @@ public class ClientHandler implements Runnable{
 
             String joinMsg = clientName + " has joined the chat.";
             System.out.println(joinMsg);
-
+            Server.broadcast(joinMsg, this);
 
             String inputLine;
             while((inputLine = in.readLine()) != null){
                 if(inputLine.equals("bye")) {
-                    
+                    break;
                 }
+
+                Server.broadcast(inputLine, this);
             }
             
         }catch(IOException e){
-            System.out.println("Can't connect right now...");
+           System.err.println("Error handling client " + clientName + " " + e.getMessage());
+        } finally {
+            String exitMessage = clientName + " has lest the chat";
+            //cleanup when client leaves
+            System.out.println(exitMessage);
+            Server.removeClient(this);
+            Server.broadcast(exitMessage, this);
         }
 
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    
+    public void sendMessage(String message) {
+        out.println(message);
+    }
+
 }
