@@ -38,11 +38,12 @@ public class WeatherFetcher {
             if (status == 200) {
                 System.out.println("SUCCESS!");
                 System.out.println(response.body());
-            } else
+            } else {
                 System.out.println("ERROR: " + status);
+            }
 
         } catch (IOException | InterruptedException e) {
-            System.out.println("An error occurred while making the request...");
+            System.out.println("Error: " + e.getMessage());
 
         } finally {
             sc.close(); // Close scanner
