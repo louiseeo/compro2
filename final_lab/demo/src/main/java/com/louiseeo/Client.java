@@ -18,7 +18,7 @@ public class Client {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 Scanner scanner = new Scanner(System.in)) {
 
-            System.out.println("=== Connected to Chat Server ===");
+            System.out.println("-+-+-+-+ Welcome to UnderCoven! -+-+-+-+");
 
             // Receive prompt for name from server
             String namePrompt = in.readLine();
@@ -45,14 +45,10 @@ public class Client {
             System.out.print("> ");
             while (true) {
                 String input = scanner.nextLine();
-                out.println(input);
-
-                if (input.equalsIgnoreCase("bye")) {
-                    break;
+                if (input != null && !input.isBlank()) {
+                    out.println(input);
                 }
             }
-
-            System.out.println("Closing connection...");
 
         } catch (IOException e) {
             System.err.println("Client Error: " + e.getMessage());

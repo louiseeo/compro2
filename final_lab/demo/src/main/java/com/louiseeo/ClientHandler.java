@@ -2,10 +2,13 @@ package com.louiseeo;
 
 import java.io.*;
 import java.net.Socket;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
+import com.louiseeo.enums.GamePhase;
+import com.louiseeo.model.CitizenPlayer;
 import com.louiseeo.model.Player;
+import com.louiseeo.service.ChatService;
+import com.louiseeo.service.GameService;
+import com.louiseeo.service.VoteService;
 
 /**
  * Handles communication between the server and a single client.
@@ -15,8 +18,12 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    private String clientName;
     private Player player;
+    private int messageCount = 0;
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
     public Player getPlayer() {
         return player;
@@ -33,11 +40,10 @@ public class ClientHandler implements Runnable {
     public void run() {
         try {
             setupStreams(); // initialize I/O streams
-            clientName(); // get client name
+            registerPlayer(); // register player
 
             // Add client to server list and notify others
-            Server.addClient(this);
-            Server.broadcast(getTimestamp() + " " + clientName + " joined the chat.", this);
+            ChatService.addClient(this);
 
             handleChat(); // start receiving messages
         } catch (IOException e) {
@@ -58,13 +64,20 @@ public class ClientHandler implements Runnable {
     /**
      * Prompts the client to enter a name.
      */
-    public void clientName() throws IOException {
+    public void registerPlayer() throws IOException {
+        String username;
         do {
-            out.println("Enter your name:");
-            clientName = in.readLine();
-        } while (clientName == null || clientName.isBlank());
+            // Note: Use sendMessage() or out.println() depending on your setup
+            out.println("Enter your username:");
+            username = in.readLine();
+            if (username != null)
+                username = username.trim();
+        } while (username == null || username.isBlank());
 
-        System.out.println(clientName + " joined the chat.");
+        player = new CitizenPlayer(username, "");
+        GameService.addPlayer(player);
+
+        System.out.println(username + " joined the game.");
     }
 
     /**
@@ -73,17 +86,57 @@ public class ClientHandler implements Runnable {
      */
     public void handleChat() throws IOException {
         String message;
-
         while ((message = in.readLine()) != null) {
-            if (message.equalsIgnoreCase("bye")) {
-                break;
+
+            // PLAY AGAIN PHASE
+            if (GameService.getCurrentPhase() == GamePhase.PLAY_AGAIN) {
+
+                if (message.equalsIgnoreCase("yes")) {
+
+                    VoteService.resetVotes();
+
+                    GameService.startGame();
+                } else if (message.equalsIgnoreCase("no")) {
+
+                    sendMessage("Goodbye!");
+
+                    socket.close();
+                }
+
+                continue;
+            }
+            // VOTING PHASE
+            else if (GameService.getCurrentPhase() == GamePhase.VOTING) {
+
+                VoteService.submitVote(this, message);
             }
 
-            String formatted = getTimestamp() + " " + clientName + ": " + message;
+            // PLAYER WANTS TO START VOTING
+            else if (message.equalsIgnoreCase("vote")) {
 
-            Server.broadcast(formatted, this);
-            sendMessage(getTimestamp() + " You: " + message);
+                if (messageCount >= 3) {
+
+                    VoteService.handleVote(this);
+
+                } else {
+
+                    sendMessage("You need at least 3 messages before voting!");
+                }
+            }
+
+            // NORMAL CHAT
+            else {
+
+                messageCount++;
+
+                String formatted = "[" + player.getUsername() + "]: " + message;
+
+                ChatService.broadcast(formatted, this);
+
+                sendMessage("[You]: " + message);
+            }
         }
+
     }
 
     /**
@@ -100,17 +153,23 @@ public class ClientHandler implements Runnable {
      */
     public void cleanup() {
         try {
-            if (clientName != null) {
-                String leaveMsg = getTimestamp() + " " + clientName + " left the chat.";
+            if (player != null) {
+                String leaveMsg = player.getUsername() + " left the game.";
                 System.out.println(leaveMsg);
-                Server.broadcast(leaveMsg, this);
+                ChatService.broadcastAll(leaveMsg);
+                GameService.removePlayer(player);
             }
 
-            Server.removeClient(this); // removes client in server list
-
+            ChatService.removeClient(this); // removes client in server list
+            VoteService.resetVotes();
             // close socket connection
             if (socket != null && !socket.isClosed()) {
                 socket.close();
+            }
+
+            if (GameService.getPlayers().size() < 3) {
+                GameService.setCurrentPhase(GamePhase.LOBBY);
+                ChatService.broadcastAll("Not enough players. Returning to lobby.");
             }
 
         } catch (IOException e) {
@@ -118,12 +177,8 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    /**
-     * Generates a timestamp in [HH:mm] format.
-     */
-    public String getTimestamp() {
-        return "[" + LocalTime.now()
-                .format(DateTimeFormatter.ofPattern("HH:mm")) + "]";
+    public void resetMessageCount() {
+        messageCount = 0;
     }
 
 }

@@ -2,29 +2,29 @@ package com.louiseeo.model;
 
 public class WordPair {
     private String real;
-    private String decoy;
+    private String hint;
 
     public WordPair() {}
     
-    public WordPair(String real, String decoy) {
+    public WordPair(String real, String hint) {
         this.real = real;
-        this.decoy = decoy;
+        this.hint = hint;
     }
 
     public void setReal(String real) {
         this.real = real;
     }
 
-    public void setDecoy(String decoy) {
-        this.decoy = decoy;
+    public void setHint(String hint) {
+        this.hint = hint;
     }
 
     public String getReal() {
         return real;
     }
 
-    public String getDecoy() {
-        return decoy;
+    public String getHint() {
+        return hint;
     }
 
 }

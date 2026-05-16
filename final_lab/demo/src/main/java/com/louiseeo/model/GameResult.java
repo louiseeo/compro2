@@ -3,15 +3,15 @@ package com.louiseeo.model;
 public class GameResult {
     private String imposterUsername;
     private String realWord;
-    private String decoyWord;
+    private String hintWord;
     private String winner;
 
     public GameResult() {}
 
-    public GameResult(String imposterUsername, String realWord, String decoyWord, String winner) {
+    public GameResult(String imposterUsername, String realWord, String hintWord, String winner) {
         this.imposterUsername = imposterUsername;
         this.realWord = realWord;
-        this.decoyWord = decoyWord;
+        this.hintWord = hintWord;
         this.winner = winner;
     }
 
@@ -31,12 +31,12 @@ public class GameResult {
         this.realWord = realWord;
     }
 
-    public String getDecoyWord() {
-        return decoyWord;
+    public String gethintWord() {
+        return hintWord;
     }
 
-    public void setDecoyWord(String decoyWord) {
-        this.decoyWord = decoyWord;
+    public void sethintWord(String hintWord) {
+        this.hintWord = hintWord;
     }
 
     public String getWinner() {
