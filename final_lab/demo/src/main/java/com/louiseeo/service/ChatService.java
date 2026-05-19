@@ -3,13 +3,18 @@ package com.louiseeo.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import com.louiseeo.ClientHandler;
-import com.louiseeo.enums.GamePhase;
 
+/**
+ * Manages connected clients and message broadcasting.
+ * Sends chat messages to individual players or all players.
+ *
+ * @author louiseeo
+ */
 public class ChatService {
-    // For networking layer
-    private static final List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
+
+    private static final List<ClientHandler> clients =
+            Collections.synchronizedList(new ArrayList<>());
 
     public static List<ClientHandler> getClients() {
         return clients;
@@ -48,11 +53,11 @@ public class ChatService {
      */
     public static void addClient(ClientHandler handler) {
         clients.add(handler);
-        broadcastAll(
-                handler.getPlayer().getUsername()
-                        + " joined the game.");
-        if (GameService.getPlayers().size() >= 3 && GameService.getCurrentPhase() == GamePhase.LOBBY) {
-            GameService.startGame();
-        }
+        ChatService.broadcastAll(
+            "\n"
+            + UIService.system(handler.getPlayer().getUsername() + " joined the lobby.") + "\n"
+            + UIService.tip("Type 'ready' to start.") + "\n"
+            + UIService.divider()
+        );
     }
 }

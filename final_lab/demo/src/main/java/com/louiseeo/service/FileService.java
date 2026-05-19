@@ -2,18 +2,21 @@ package com.louiseeo.service;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.louiseeo.model.GameResult;
 import com.louiseeo.model.WordPair;
 
+/**
+ * Handles file loading operations for the game.
+ * Used for reading word bank data from JSON files.
+ *
+ * @author louiseeo
+ */
 public class FileService {
 
     /**
@@ -42,31 +45,6 @@ public class FileService {
             System.out.println("Error loading file: " + filename + " -> " + e.getMessage());
         }
         return pairs;
-    }
-
-    /**
-     * Saves a game result to the game history file.
-     * The result is converted into JSON format and appended
-     * to the specified file.
-     *
-     * @param filename the path to the game history file
-     * @param result   the game result object to save
-     */
-    public static void saveGameHistory(String filename, GameResult result) {
-        Gson gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
-
-        try (FileWriter fw = new FileWriter(filename, true)) {
-
-            String json = gson.toJson(result);
-
-            fw.write(json);
-            fw.write(System.lineSeparator());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }

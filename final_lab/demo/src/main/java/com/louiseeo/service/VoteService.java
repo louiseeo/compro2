@@ -1,16 +1,26 @@
 package com.louiseeo.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.louiseeo.ClientHandler;
 import com.louiseeo.enums.GamePhase;
 import com.louiseeo.model.Player;
 
+/**
+ * Handles all voting-related features in the game.
+ * Manages vote requests, vote submissions,
+ * vote counting, and play-again responses.
+ *
+ * @author louiseeo
+ */
 public class VoteService {
+
     private static int voteCount;
     private static Map<ClientHandler, Boolean> voteRequests = new HashMap<>();
     private static Map<ClientHandler, Integer> votes = new HashMap<>();
+    private static Map<ClientHandler, String> playAgainResponses =
+            Collections.synchronizedMap(new HashMap<>());
 
     public static void setVoteCount(int voteCount) {
         VoteService.voteCount = voteCount;
@@ -20,116 +30,112 @@ public class VoteService {
         return voteCount;
     }
 
+    /**
+     * Handles a player's request to start voting.
+     * Begins the voting phase once majority is reached.
+     *
+     * @param voter : the player requesting to vote
+     */
     public static synchronized void handleVote(ClientHandler voter) {
-
         if (voteRequests.containsKey(voter)) {
-            voter.sendMessage("You already requested voting!");
+            voter.sendMessage(UIService.error("You already requested voting!"));
             return;
         }
 
         voteRequests.put(voter, true);
-
         voteCount++;
 
         ChatService.broadcastAll(
+            UIService.system(
                 voter.getPlayer().getUsername()
-                        + " wants to vote!! ("
-                        + voteCount + "/"
-                        + GameService.getPlayers().size() + ")");
+                + " wants to vote.  ("
+                + voteCount + "/" + GameService.getPlayers().size() + ")"
+            )
+        );
 
         int majority = (GameService.getPlayers().size() / 2) + 1;
-
         if (voteCount >= majority) {
-
             voteCount = 0;
-
             voteRequests.clear();
-
             GameService.setCurrentPhase(GamePhase.VOTING);
-
             startVoting();
         }
     }
 
+    /**
+     * Displays the list of players and starts the voting phase.
+     */
     public static void startVoting() {
-
-        ChatService.broadcastAll(
-                "=== VOTING PHASE! Who is the Imposter? ===");
+        StringBuilder table = new StringBuilder();
+        table.append(UIService.votingPhase());
 
         synchronized (ChatService.getClients()) {
-
             for (int i = 0; i < ChatService.getClients().size(); i++) {
-
-                ChatService
-                        .broadcastAll("[" + (i + 1) + "] " + ChatService.getClients()
-                                .get(i)
-                                .getPlayer()
-                                .getUsername());
+                String name = ChatService.getClients().get(i).getPlayer().getUsername();
+                table.append(String.format("  %-4d  %s\n", i + 1, name));
             }
         }
 
-        ChatService.broadcastAll(
-                "Enter the number of who you think is the Imposter:");
+        table.append("\n").append(UIService.divider()).append("\n");
+        table.append("Enter the number of who you think is the imposter:");
+        ChatService.broadcastAll(table.toString());
     }
 
+    /**
+     * Records a player's vote during the voting phase.
+     * Counts votes once all players have voted.
+     *
+     * @param voter : the client submitting a vote
+     * @param input : selected player number
+     */
     public static synchronized void submitVote(ClientHandler voter, String input) {
-
         try {
-
             int voteIndex = Integer.parseInt(input) - 1;
 
-            // invalid player number
-            if (voteIndex < 0 ||
-                    voteIndex >= ChatService.getClients().size()) {
-
-                voter.sendMessage("Invalid player number!");
+            if (voteIndex < 0 || voteIndex >= ChatService.getClients().size()) {
+                voter.sendMessage(UIService.error("Invalid player number."));
                 return;
             }
 
-            // already voted
             if (votes.containsKey(voter)) {
-
-                voter.sendMessage("You already voted!");
+                voter.sendMessage(UIService.error("You already voted."));
                 return;
             }
 
             if (ChatService.getClients().get(voteIndex) == voter) {
-
-                voter.sendMessage("You cannot vote for yourself!");
-
+                voter.sendMessage(UIService.error("You cannot vote for yourself."));
                 return;
             }
 
             votes.put(voter, voteIndex);
-            voter.sendMessage("Vote submitted!");
+            voter.sendMessage(UIService.success("Vote submitted."));
 
-            // everyone voted
             if (votes.size() == GameService.getPlayers().size()) {
-
                 countVotes();
             }
 
         } catch (NumberFormatException e) {
-
-            voter.sendMessage("Please enter a valid number!");
+            voter.sendMessage(UIService.error("Please enter a valid number."));
         }
     }
 
+    /**
+     * Counts all submitted votes and determines
+     * which player is eliminated.
+     * Handles tie situations when necessary.
+     */
     public static void countVotes() {
-
         Map<Integer, Integer> tally = new HashMap<>();
         boolean tie = false;
-        for (int vote : votes.values()) {
 
-            tally.put(vote,
-                    tally.getOrDefault(vote, 0) + 1);
+        for (int vote : votes.values()) {
+            tally.put(vote, tally.getOrDefault(vote, 0) + 1);
         }
 
         int maxVotes = 0;
         int eliminatedIndex = 0;
 
         for (Map.Entry<Integer, Integer> entry : tally.entrySet()) {
-
             if (entry.getValue() > maxVotes) {
                 maxVotes = entry.getValue();
                 eliminatedIndex = entry.getKey();
@@ -140,30 +146,94 @@ public class VoteService {
         }
 
         if (tie) {
-
             ChatService.broadcastAll(
-                    "Tie vote! Nobody is eliminated!");
-
+                "\n"
+                + UIService.system("It's a tie! Nobody eliminated.") + "\n"
+                + UIService.tip("Starting another vote...") + "\n"
+                + UIService.divider()
+            );
             votes.clear();
-
-            GameService.setCurrentPhase(GamePhase.CHAT);
-
+            voteRequests.clear();
+            GameService.setCurrentPhase(GamePhase.VOTING);
+            startVoting();
             return;
         }
 
-        Player eliminated = ChatService.getClients()
-                .get(eliminatedIndex)
-                .getPlayer();
-
+        Player eliminated = ChatService.getClients().get(eliminatedIndex).getPlayer();
         votes.clear();
-
         GameService.checkWinCondition(eliminated);
     }
 
+    /**
+     * Clears all stored voting data for a new game round.
+     */
     public static void resetVotes() {
         voteCount = 0;
         votes.clear();
         voteRequests.clear();
+        playAgainResponses.clear();
     }
 
+    /**
+     * Handles player responses for playing again.
+     * Starts a new game if majority votes yes,
+     * otherwise disconnects all clients.
+     *
+     * @param client   : responding client
+     * @param response : yes or no response
+     */
+    public static synchronized boolean handlePlayAgain(ClientHandler client, String response) {
+        if (!response.equalsIgnoreCase("yes") && !response.equalsIgnoreCase("no")) {
+            client.sendMessage(UIService.error("Please type 'yes' or 'no' only."));
+            return false;
+        }
+
+        if (playAgainResponses.containsKey(client)) {
+            client.sendMessage(UIService.error("You already responded."));
+            return false;
+        }
+
+        playAgainResponses.put(client, response);
+        int totalPlayers = GameService.getPlayers().size();
+
+        ChatService.broadcastAll(
+            UIService.system(
+                client.getPlayer().getUsername()
+                + " voted " + response + ".  ("
+                + playAgainResponses.size() + "/" + totalPlayers + " responded)"
+            )
+        );
+
+        if (playAgainResponses.size() < totalPlayers) {
+            return false;
+        }
+
+        long yesCount = playAgainResponses.values().stream()
+                .filter(r -> r.equalsIgnoreCase("yes")).count();
+        playAgainResponses.clear();
+
+        if (yesCount >= (totalPlayers / 2) + 1) {
+            resetVotes();
+            GameService.startGame();
+            return false;
+        } else {
+            ChatService.broadcastAll(
+                "\n"
+                + UIService.system("Majority voted no. Returning to main menu...") + "\n"
+                + UIService.thickDivider()
+            );
+            resetVotes();
+
+            synchronized (ChatService.getClients()) {
+                for (ClientHandler c : ChatService.getClients()) {
+                    c.sendMessage(UIService.system("Returning to main menu..."));
+                }
+            
+            }
+
+            GameService.getPlayers().clear();
+            GameService.setCurrentPhase(GamePhase.LOBBY);
+            return true;
+        }
+    }
 }

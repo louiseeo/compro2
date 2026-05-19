@@ -12,14 +12,14 @@ public class Server {
             System.out.println("--- UnderCoven Server Started on Port " + PORT + " ---");
 
             while (true) {
-                // Wait for an actual NEW physical terminal connection
+                // Wait for an actual new physical terminal connection
                 Socket clientSocket = server.accept();
                 System.out.println("New physical connection from: " + clientSocket.getRemoteSocketAddress());
 
-                // Create ONE handler for this unique socket connection
+                // Create one handler for this unique socket connection
                 ClientHandler client = new ClientHandler(clientSocket);
 
-                // Start ONE background thread execution loop
+                // Start one background thread execution loop
                 Thread clientThread = new Thread(client);
                 clientThread.start();
             }

@@ -1,5 +1,12 @@
 package com.louiseeo.model;
 
+/**
+ * Represents a player in the game.
+ * Stores common player information such as
+ * username, role, and assigned word.
+ *
+ * @author louiseeo
+ */
 public abstract class Player {
     private String username;
     private String word;

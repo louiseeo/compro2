@@ -1,5 +1,12 @@
 package com.louiseeo.model;
 
+/**
+ * Represents a pair of game words.
+ * Stores the real word and the hint
+ * shown to the imposter.
+ *
+ * @author louiseeo
+ */
 public class WordPair {
     private String real;
     private String hint;
