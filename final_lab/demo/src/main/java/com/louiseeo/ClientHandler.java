@@ -64,21 +64,19 @@ public class ClientHandler implements Runnable {
 
                 ChatService.removeClient(this);
                 if (player != null) {
+                    // print leave message here
+                    System.out.println(player.getUsername() + " left the game.");
                     GameService.removePlayer(player);
                     player = null;
                 }
 
                 resetMessageCount();
                 returningToMenu = false;
-                sendMessage(
-                        "\n"
-                                + UIService.thickDivider() + "\n"
-                                + "  Returning to main menu...\n"
-                                + UIService.thickDivider() + "\n");
             }
         } catch (IOException e) {
             System.err.println("Connection error: " + e.getMessage());
         } finally {
+            returningToMenu = false;
             cleanup();
         }
     }
@@ -262,7 +260,22 @@ public class ClientHandler implements Runnable {
                 if (GameService.getCurrentPhase() == GamePhase.PLAY_AGAIN) {
                     boolean shouldExit = VoteService.handlePlayAgain(this, message);
                     if (shouldExit) {
-                        // set flag on all clients — their timeout will catch it
+                        synchronized (ChatService.getClients()) {
+                            for (ClientHandler receiver : ChatService.getClients()) {
+                                for (ClientHandler c : ChatService.getClients()) {
+                                    if (receiver == c) {
+                                        receiver.sendMessage(UIService.system("You left the game."));
+                                    } else {
+                                        receiver.sendMessage(
+                                                UIService.system(c.getPlayer().getUsername() + " left the game."));
+                                    }
+                                }
+                            }
+                        }
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                        }
                         synchronized (ChatService.getClients()) {
                             for (ClientHandler c : ChatService.getClients()) {
                                 c.returningToMenu = true;
@@ -319,9 +332,23 @@ public class ClientHandler implements Runnable {
     public void cleanup() {
         try {
             if (!returningToMenu && player != null) {
-                String leaveMsg = UIService.system(player.getUsername() + " left the game.");
                 System.out.println(player.getUsername() + " left the game.");
-                ChatService.broadcastAll(leaveMsg);
+                ChatService.broadcastAll(UIService.system(player.getUsername() + " left the game."));
+
+                // handle play again BEFORE removing from lists
+                if (GameService.getCurrentPhase() == GamePhase.PLAY_AGAIN) {
+                    boolean shouldExit = VoteService.handlePlayAgain(this, "no");
+                    if (shouldExit) {
+                        synchronized (ChatService.getClients()) {
+                            for (ClientHandler c : ChatService.getClients()) {
+                                if (c != this) {
+                                    c.returningToMenu = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 GameService.removePlayer(player);
             }
 
@@ -355,8 +382,13 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Closes the client's socket connection.
+     * Prints the client's address to the server console.
+     */
     public void closeConnection() {
         try {
+            System.out.println("Client disconnected: " + socket.getRemoteSocketAddress());
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }

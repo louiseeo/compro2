@@ -19,8 +19,7 @@ public class VoteService {
     private static int voteCount;
     private static Map<ClientHandler, Boolean> voteRequests = new HashMap<>();
     private static Map<ClientHandler, Integer> votes = new HashMap<>();
-    private static Map<ClientHandler, String> playAgainResponses =
-            Collections.synchronizedMap(new HashMap<>());
+    private static Map<ClientHandler, String> playAgainResponses = Collections.synchronizedMap(new HashMap<>());
 
     public static void setVoteCount(int voteCount) {
         VoteService.voteCount = voteCount;
@@ -46,12 +45,10 @@ public class VoteService {
         voteCount++;
 
         ChatService.broadcastAll(
-            UIService.system(
-                voter.getPlayer().getUsername()
-                + " wants to vote.  ("
-                + voteCount + "/" + GameService.getPlayers().size() + ")"
-            )
-        );
+                UIService.system(
+                        voter.getPlayer().getUsername()
+                                + " wants to vote.  ("
+                                + voteCount + "/" + GameService.getPlayers().size() + ")"));
 
         int majority = (GameService.getPlayers().size() / 2) + 1;
         if (voteCount >= majority) {
@@ -93,29 +90,34 @@ public class VoteService {
             int voteIndex = Integer.parseInt(input) - 1;
 
             if (voteIndex < 0 || voteIndex >= ChatService.getClients().size()) {
-                voter.sendMessage(UIService.error("Invalid player number."));
+                voter.sendMessage(UIService.divider() + "\n" + UIService.error("Invalid player number.") + "\n"
+                        + UIService.divider());
                 return;
             }
 
             if (votes.containsKey(voter)) {
-                voter.sendMessage(UIService.error("You already voted."));
+                voter.sendMessage(UIService.divider() + "\n" + UIService.error("You already voted.") + "\n"
+                        + UIService.divider());
                 return;
             }
 
             if (ChatService.getClients().get(voteIndex) == voter) {
-                voter.sendMessage(UIService.error("You cannot vote for yourself."));
+                voter.sendMessage(UIService.divider() + "\n" + UIService.error("You cannot vote for youself.") + "\n"
+                        + UIService.divider());
                 return;
             }
 
             votes.put(voter, voteIndex);
-            voter.sendMessage(UIService.success("Vote submitted."));
+            voter.sendMessage(UIService.success(
+                    "You voted for " + ChatService.getClients().get(voteIndex).getPlayer().getUsername() + "."));
 
             if (votes.size() == GameService.getPlayers().size()) {
                 countVotes();
             }
 
         } catch (NumberFormatException e) {
-            voter.sendMessage(UIService.error("Please enter a valid number."));
+            voter.sendMessage(UIService.error(UIService.divider() + "\n" + "Please enter a valid number.") + "\n"
+                    + UIService.divider());
         }
     }
 
@@ -147,11 +149,10 @@ public class VoteService {
 
         if (tie) {
             ChatService.broadcastAll(
-                "\n"
-                + UIService.system("It's a tie! Nobody eliminated.") + "\n"
-                + UIService.tip("Starting another vote...") + "\n"
-                + UIService.divider()
-            );
+                    "\n"
+                            + UIService.system("It's a tie! Nobody eliminated.") + "\n"
+                            + UIService.tip("Starting another vote...") + "\n"
+                            + UIService.divider());
             votes.clear();
             voteRequests.clear();
             GameService.setCurrentPhase(GamePhase.VOTING);
@@ -194,15 +195,13 @@ public class VoteService {
         }
 
         playAgainResponses.put(client, response);
-        int totalPlayers = GameService.getPlayers().size();
+        int totalPlayers = ChatService.getClients().size();
 
         ChatService.broadcastAll(
-            UIService.system(
-                client.getPlayer().getUsername()
-                + " voted " + response + ".  ("
-                + playAgainResponses.size() + "/" + totalPlayers + " responded)"
-            )
-        );
+                UIService.system(
+                        client.getPlayer().getUsername()
+                                + " voted " + response + ".  ("
+                                + playAgainResponses.size() + "/" + totalPlayers + " responded)"));
 
         if (playAgainResponses.size() < totalPlayers) {
             return false;
@@ -210,30 +209,31 @@ public class VoteService {
 
         long yesCount = playAgainResponses.values().stream()
                 .filter(r -> r.equalsIgnoreCase("yes")).count();
-        playAgainResponses.clear();
+        long noCount = totalPlayers - yesCount;
 
-        if (yesCount >= (totalPlayers / 2) + 1) {
+        if (yesCount > noCount) {
+            // majority yes — start new game
             resetVotes();
             GameService.startGame();
             return false;
-        } else {
+        } else if (noCount > yesCount) {
+            // majority no — return to menu
             ChatService.broadcastAll(
-                "\n"
-                + UIService.system("Majority voted no. Returning to main menu...") + "\n"
-                + UIService.thickDivider()
-            );
+                    "\n"
+                            + UIService.system("Majority voted no. Returning to main menu...") + "\n"
+                            + UIService.thickDivider());
             resetVotes();
-
-            synchronized (ChatService.getClients()) {
-                for (ClientHandler c : ChatService.getClients()) {
-                    c.sendMessage(UIService.system("Returning to main menu..."));
-                }
-            
-            }
-
-            GameService.getPlayers().clear();
             GameService.setCurrentPhase(GamePhase.LOBBY);
             return true;
+        } else {
+            // tie = ask the players again
+            ChatService.broadcastAll(
+                    "\n"
+                            + UIService.system("It's a tie! Vote again.") + "\n"
+                            + UIService.divider());
+            playAgainResponses.clear();
+            ChatService.broadcastAll(UIService.playAgain());
+            return false;
         }
     }
 }

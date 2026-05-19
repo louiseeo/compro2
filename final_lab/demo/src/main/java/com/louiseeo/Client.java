@@ -29,9 +29,6 @@ public class Client {
                             System.out.println(msg);
                         } else {
                             System.out.println(msg);
-                           
-                            
-                            
                         }
                     }
                     System.out.println("\n===== Server has shut down. =====");
