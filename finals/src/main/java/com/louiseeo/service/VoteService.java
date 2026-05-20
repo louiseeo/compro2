@@ -116,7 +116,7 @@ public class VoteService {
             }
 
         } catch (NumberFormatException e) {
-            voter.sendMessage(UIService.error(UIService.divider() + "\n" + "Please enter a valid number.") + "\n"
+            voter.sendMessage(UIService.divider() + "\n" + UIService.error("Please enter a valid number.") + "\n"
                     + UIService.divider());
         }
     }

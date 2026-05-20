@@ -1,7 +1,7 @@
 [
   {
     "username": "louise",
-    "points": 190
+    "points": 170
   },
   {
     "username": "lee",
@@ -9,14 +9,22 @@
   },
   {
     "username": "ret",
-    "points": 100
+    "points": 20
   },
   {
     "username": "milk",
-    "points": -20
+    "points": 10
   },
   {
     "username": "lo",
     "points": -30
+  },
+  {
+    "username": "lol",
+    "points": 30
+  },
+  {
+    "username": "potty",
+    "points": 30
   }
 ]
